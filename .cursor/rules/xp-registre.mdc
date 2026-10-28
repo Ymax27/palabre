@@ -1,0 +1,10 @@
+---
+description: Les points XP passent uniquement par services/xp.py
+alwaysApply: true
+---
+
+# XP uniquement via services/xp.py
+
+Tout gain ou perte d'XP passe par `app/services/xp.py` : une ligne de registre par événement, plafond 100/jour, anti-réciprocité.
+
+Ne jamais incrémenter ou modifier un total d'XP à la main (routeur, modèle, job, SQL).

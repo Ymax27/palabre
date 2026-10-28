@@ -1,0 +1,10 @@
+---
+description: La logique métier vit dans services/, les routeurs restent fins
+alwaysApply: true
+---
+
+# Services pour la logique
+
+Les routeurs HTTP valident l'entrée, appellent un service, et renvoient une vue (partial HTMX) ou du JSON pour `/api/v1/*`.
+
+Ne pas mettre de règles métier, d'XP, ni d'accès SQLAlchemy complexes dans `app/routers/`. Ça va dans `app/services/`.

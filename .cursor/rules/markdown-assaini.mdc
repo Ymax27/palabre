@@ -1,0 +1,10 @@
+---
+description: Le markdown utilisateur est toujours rendu puis assaini
+alwaysApply: true
+---
+
+# Markdown toujours assaini
+
+Toute saisie markdown (questions, réponses, recettes, messages) passe par le rendu puis `nh3` avant affichage.
+
+Ne jamais interpoler du HTML utilisateur brut dans un template Jinja2.
