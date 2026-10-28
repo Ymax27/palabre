@@ -6,3 +6,5 @@ node_modules/
 app/static/app.css
 .mypy_cache/
 .ruff_cache/
+.pytest_cache/
+.pre-commit-cache/
