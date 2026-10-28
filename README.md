@@ -24,12 +24,13 @@ pip install -e ".[dev]"
 
 docker compose up -d
 alembic upgrade head
+# équivalent : docker compose exec app alembic upgrade head
 curl -sf localhost:8000/health
 ```
 
 `/health` doit répondre `200` avec `{"status":"ok","database":"ok"}`. L'accueil est sur `http://localhost:8000/`.
 
-Les identifiants Postgres du `.env.example` et de Compose (`palabre` / `palabre`) sont des valeurs locales, pas des secrets.
+Les identifiants Postgres du `.env.example` et de Compose (`palabre` / `palabre`) sont des valeurs locales, pas des secrets. Si les ports 5432 ou 6379 sont déjà pris : `POSTGRES_PORT=5433 VALKEY_PORT=6380 docker compose up -d`.
 
 ## CSS (Tailwind CLI standalone)
 

@@ -8,7 +8,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U palabre -d palabre"]
       interval: 5s
@@ -18,10 +18,12 @@ services:
   valkey:
     image: valkey/valkey:8
     ports:
-      - "6379:6379"
+      - "${VALKEY_PORT:-6379}:6379"
 
   app:
-    build: .
+    build:
+      context: .
+      network: host
     ports:
       - "8000:8000"
     environment:
