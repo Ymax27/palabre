@@ -8,3 +8,5 @@ app/static/app.css
 .ruff_cache/
 .pytest_cache/
 .pre-commit-cache/
+tailwindcss
+tailwindcss-*

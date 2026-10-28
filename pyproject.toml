@@ -6,6 +6,7 @@ build-backend = "hatchling.build"
 name = "palabre"
 version = "0.1.0"
 description = "Plateforme d'échange pour développeurs africains"
+readme = "README.md"
 requires-python = ">=3.12"
 license = "MIT"
 authors = [{ name = "Palabre" }]
