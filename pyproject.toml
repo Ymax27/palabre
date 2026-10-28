@@ -1,0 +1,38 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "palabre"
+version = "0.1.0"
+description = "Plateforme d'échange pour développeurs africains"
+requires-python = ">=3.12"
+license = "MIT"
+authors = [{ name = "Palabre" }]
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "sqlalchemy[asyncio]>=2",
+    "asyncpg",
+    "alembic",
+    "pydantic-settings",
+    "jinja2",
+    "python-multipart",
+    "itsdangerous",
+    "argon2-cffi",
+    "httpx",
+    "sse-starlette",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-asyncio",
+    "ruff",
+    "mypy",
+    "pip-licenses",
+    "pre-commit",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
