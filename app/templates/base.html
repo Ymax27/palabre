@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Palabre{% endblock %}</title>
+    <link rel="stylesheet" href="/static/app.css">
+    <style>
+      :root {
+        --ink-900:#11122B; --ink-800:#1A1C3D; --ink-700:#2A2D55;
+        --sand-50:#FAF6EF; --sand-100:#F1E9DB; --sand-300:#D9CDB6;
+        --terra-500:#D9622B; --terra-600:#B94E1D;
+        --ochre-400:#E8A93B;
+        --leaf-500:#2F9E6B;
+        --info-500:#4F7CFF; --danger-500:#D64545;
+        --r-sm:8px; --r-md:12px; --r-pill:999px;
+        --s-1:4px; --s-2:8px; --s-3:12px; --s-4:16px; --s-6:24px; --s-8:32px;
+        --t-fast:150ms; --t-base:200ms;
+      }
+      html { color-scheme: light dark; }
+      body {
+        margin: 0;
+        background: var(--sand-50);
+        color: var(--ink-900);
+        font-family: Inter, system-ui, sans-serif;
+      }
+      @media (prefers-color-scheme: dark) {
+        body {
+          background: var(--ink-900);
+          color: var(--sand-50);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+          animation-duration: 0.01ms !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    {% block content %}{% endblock %}
+  </body>
+</html>
