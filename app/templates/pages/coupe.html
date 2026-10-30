@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Coupe des Nations · Palabre{% endblock %}
+{% block content %}
+  <h1>Coupe des Nations</h1>
+  {% if not standings %}
+    <p>Pas encore de classement. Les points d'un pays apparaissent après une première validation.</p>
+  {% else %}
+    <table>
+      <thead>
+        <tr>
+          <th>Rang</th>
+          <th>Pays</th>
+          <th>Score</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in standings %}
+          <tr>
+            <td>{{ row.rank }}</td>
+            <td>{{ row.label }}</td>
+            <td>{{ "%.1f"|format(row.score) }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+{% endblock %}
