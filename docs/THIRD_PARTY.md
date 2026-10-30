@@ -16,6 +16,9 @@ Licences des dépendances directes. Interdites : GPL, AGPL, LGPL. Le scan CI (`p
 | argon2-cffi | MIT | Hachage de secrets |
 | httpx | BSD-3-Clause | Client HTTP async |
 | sse-starlette | BSD-3-Clause | Server-Sent Events |
+| authlib | BSD-3-Clause | OAuth GitHub (Starlette) |
+| cryptography | Apache-2.0 OR BSD-3-Clause | Transitive directe d'authlib |
+| joserfc | BSD-3-Clause | Transitive directe d'authlib |
 | markdown-it-py | MIT | Rendu Markdown utilisateur |
 | mdurl | MIT | Transitive directe de `markdown-it-py` |
 | nh3 | MIT | Assainissement HTML après le rendu Markdown |
