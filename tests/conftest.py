@@ -10,9 +10,11 @@ from app.core.db import SessionLocal, engine
 from app.core.limiter import limiter
 from app.core.rate_limit import reset as reset_rate_limit
 from app.main import app
+from app.models.room import Room
 from app.models.user import User
 
 MakeUser = Callable[..., Awaitable[User]]
+MakeRoom = Callable[..., Awaitable[Room]]
 
 
 @pytest.fixture(autouse=True)
@@ -23,7 +25,8 @@ async def clean_db() -> AsyncIterator[None]:
         await session.execute(
             text(
                 "TRUNCATE TABLE magic_links, reactions, worked_reports, "
-                "xp_ledger, post_tags, posts, users RESTART IDENTITY CASCADE"
+                "xp_ledger, post_tags, posts, room_messages, rooms, users "
+                "RESTART IDENTITY CASCADE"
             )
         )
         await session.commit()
@@ -72,5 +75,23 @@ def make_user(session: AsyncSession) -> MakeUser:
         await session.commit()
         await session.refresh(user)
         return user
+
+    return _make
+
+
+@pytest.fixture
+def make_room(session: AsyncSession) -> MakeRoom:
+    async def _make(
+        *,
+        slug: str = "wave",
+        title: str = "Wave",
+        kind: str = "theme",
+        country: str | None = None,
+    ) -> Room:
+        room = Room(kind=kind, slug=slug, title=title, country=country)
+        session.add(room)
+        await session.commit()
+        await session.refresh(room)
+        return room
 
     return _make

@@ -22,7 +22,13 @@ Licences des dépendances directes. Interdites : GPL, AGPL, LGPL. Le scan CI (`p
 | markdown-it-py | MIT | Rendu Markdown utilisateur |
 | mdurl | MIT | Transitive directe de `markdown-it-py` |
 | nh3 | MIT | Assainissement HTML après le rendu Markdown |
+| redis (client Python) | MIT | Pub/sub Valkey pour les salons SSE |
+| slowapi | MIT | Plafonds HTTP messages / recherche / publications |
+| limits | MIT | Transitive directe de slowapi |
+| Deprecated | MIT | Transitive de `limits` |
+| wrapt | BSD-2-Clause | Transitive de `Deprecated` |
 | HTMX 2.0.4 | BSD-2-Clause | Interactions partielles (fichier auto-hébergé `app/static/vendor/htmx.min.js`) |
+| Alpine.js 3.14.8 | MIT | Palette Ctrl+K et reconnexion SSE (fichier auto-hébergé `app/static/vendor/alpine.min.js`) |
 | hatchling | MIT | Backend de build (`pyproject.toml`) |
 | pytest | MIT | Tests (dev) |
 | pytest-asyncio | Apache-2.0 | Tests async (dev) |

@@ -204,6 +204,7 @@ async def room_events(
     room_id = room.id
 
     async def _stream() -> AsyncIterator[dict[str, str]]:
+        yield {"comment": "connected"}
         async for payload in subscribe_room(room_id):
             yield {"data": payload}
 

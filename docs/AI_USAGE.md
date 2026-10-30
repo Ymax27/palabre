@@ -6,3 +6,4 @@
 | 2026-10-28 | Google Stitch | Maquettes des écrans (à venir) | |
 | 2026-10-30 | Cursor | Cœur MVP-0 : modèles, registre XP, lien magique, Q&R / Utile / accepter, Coupe v0, tests | |
 | 2026-10-30 | Cursor | Fin MVP-0 : OAuth GitHub, recettes / Ça a marché, profil, seed, handover | |
+| 2026-10-30 | Cursor | Salons SSE, conversion d'aide, recherche FTS, palette Ctrl+K, slowapi | |
