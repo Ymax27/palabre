@@ -9,6 +9,13 @@
       {% endfor %}
     </p>
     <div>{{ question.body | md }}</div>
+    {% if question.source_message and question.source_message.room %}
+      <p>
+        <a href="/salons/{{ question.source_message.room.slug }}">
+          {{ t("from_room") }} {{ question.source_message.room.title }}
+        </a>
+      </p>
+    {% endif %}
     <p>{% set author = question.author %}{% include "partials/author.html" %}</p>
   </article>
 

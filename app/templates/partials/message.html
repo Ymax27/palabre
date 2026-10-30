@@ -1,7 +1,54 @@
+{% set slug = room_slug if room_slug is defined else room.slug %}
 <article
   id="message-{{ message.id }}"
   class="room-message{% if message.needs_help %} needs-help{% endif %}{% if message.parent_id %} reply{% endif %}"
 >
   <p>{% set author = message.author %}{% include "partials/author.html" %}</p>
   <div>{{ message.body | md }}</div>
+  {% if message.converted_post_id %}
+    {% if message.converted_post and message.converted_post.type == "recette" %}
+      <p><a href="/recettes/{{ message.converted_post_id }}">{{ t("rooms_converted_recipe") }}</a></p>
+    {% else %}
+      <p><a href="/questions/{{ message.converted_post_id }}">{{ t("rooms_converted_question") }}</a></p>
+    {% endif %}
+  {% elif user is defined and user and user.handle %}
+    {% if not message.needs_help %}
+      <form
+        method="post"
+        action="/salons/{{ slug }}/messages/{{ message.id }}/aide"
+        hx-post="/salons/{{ slug }}/messages/{{ message.id }}/aide"
+        hx-target="closest article"
+        hx-swap="outerHTML"
+      >
+        <input type="hidden" name="csrf" value="{{ csrf }}">
+        <button type="submit" class="secondary">{{ t("rooms_need_help") }}</button>
+      </form>
+    {% else %}
+      <p>
+        <a href="/salons/{{ slug }}/messages/{{ message.id }}/convertir?vers=question">
+          {{ t("rooms_convert_question") }}
+        </a>
+        ·
+        <a href="/salons/{{ slug }}/messages/{{ message.id }}/convertir?vers=recette">
+          {{ t("rooms_convert_recipe") }}
+        </a>
+      </p>
+    {% endif %}
+    {% if not message.parent_id %}
+      <form
+        method="post"
+        action="/salons/{{ slug }}/messages"
+        hx-post="/salons/{{ slug }}/messages"
+        hx-target="#messages"
+        hx-swap="beforeend"
+        hx-on::after-request="if (event.detail.successful) this.reset()"
+      >
+        <input type="hidden" name="csrf" value="{{ csrf }}">
+        <input type="hidden" name="parent_id" value="{{ message.id }}">
+        <label for="reply-{{ message.id }}">{{ t("rooms_reply") }}</label>
+        <textarea id="reply-{{ message.id }}" name="body" rows="2" required></textarea>
+        <p><button type="submit" class="secondary">{{ t("rooms_send") }}</button></p>
+      </form>
+    {% endif %}
+  {% endif %}
 </article>

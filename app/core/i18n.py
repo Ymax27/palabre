@@ -10,6 +10,13 @@ STRINGS: dict[str, str] = {
     "rooms_send": "Envoyer",
     "rooms_login": "pour écrire dans le salon.",
     "rooms_reconnect": "Connexion instable. On réessaie, ton texte est gardé.",
+    "rooms_need_help": "Besoin d'aide",
+    "rooms_convert_question": "Convertir en question",
+    "rooms_convert_recipe": "Convertir en recette",
+    "rooms_converted_question": "Voir la question",
+    "rooms_converted_recipe": "Voir la recette",
+    "rooms_reply": "Répondre",
+    "from_room": "Issu du salon",
     "pitch": (
         "Ici, les devs africains se répondent, se valident et font monter leur pays."
     ),

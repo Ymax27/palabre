@@ -9,6 +9,13 @@
       {% endfor %}
     </p>
     <div>{{ recipe.body | md }}</div>
+    {% if recipe.source_message and recipe.source_message.room %}
+      <p>
+        <a href="/salons/{{ recipe.source_message.room.slug }}">
+          {{ t("from_room") }} {{ recipe.source_message.room.title }}
+        </a>
+      </p>
+    {% endif %}
     <p>{% set author = recipe.author %}{% include "partials/author.html" %}</p>
   </article>
   {% include "partials/marche.html" %}

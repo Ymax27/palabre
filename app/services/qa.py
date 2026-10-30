@@ -5,8 +5,10 @@ from sqlalchemy.orm import selectinload
 from app.models.enums import PostType, ReactionKind, TagCategory
 from app.models.post import Post
 from app.models.reaction import Reaction
+from app.models.room_message import RoomMessage
 from app.models.tag import Tag
 from app.models.user import User
+from app.services.rooms import link_converted_post
 from app.services.xp import grant_answer_accepted
 
 
@@ -53,6 +55,7 @@ async def create_question(
     title: str,
     body: str,
     tag_ids: list[int],
+    source_message_id: int | None = None,
 ) -> Post:
     title_clean = title.strip()
     body_clean = body.strip()
@@ -71,6 +74,12 @@ async def create_question(
         tags=tags,
     )
     session.add(post)
+    await session.flush()
+    await link_converted_post(
+        session,
+        message_id=source_message_id,
+        post=post,
+    )
     await session.commit()
     await session.refresh(post)
     return post
@@ -85,6 +94,7 @@ async def get_question(session: AsyncSession, question_id: int) -> Post | None:
             selectinload(Post.author),
             selectinload(Post.answers).selectinload(Post.author),
             selectinload(Post.answers).selectinload(Post.reactions),
+            selectinload(Post.source_message).selectinload(RoomMessage.room),
         )
     )
     return await session.scalar(stmt)

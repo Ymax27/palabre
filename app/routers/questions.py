@@ -51,6 +51,7 @@ async def ask_submit(
     title: str = Form(...),
     body: str = Form(...),
     csrf: str = Form(...),
+    source_message_id: str | None = Form(None),
 ) -> Response:
     require_csrf(request, csrf)
     form = await request.form()
@@ -58,6 +59,11 @@ async def ask_submit(
     tag_ids = [
         int(value) for value in raw_tags if isinstance(value, str) and value.isdigit()
     ]
+    source_id = (
+        int(source_message_id)
+        if source_message_id and source_message_id.isdigit()
+        else None
+    )
     try:
         question = await create_question_post(
             session,
@@ -65,6 +71,7 @@ async def ask_submit(
             title=title,
             body=body,
             tag_ids=tag_ids,
+            source_message_id=source_id,
         )
     except QaError as exc:
         groups = await tags_grouped(session)
@@ -81,6 +88,9 @@ async def ask_submit(
                 user,
                 tag_groups=groups,
                 error=message,
+                prefill_title=title,
+                prefill_body=body,
+                source_message_id=source_id,
             ),
             status_code=status.HTTP_400_BAD_REQUEST,
         )

@@ -8,9 +8,11 @@ from sqlalchemy.orm import selectinload
 from app.core.countries import COUNTRY_CODES
 from app.models.enums import PostType, TagCategory
 from app.models.post import Post
+from app.models.room_message import RoomMessage
 from app.models.tag import Tag
 from app.models.user import User
 from app.models.worked_report import WorkedReport
+from app.services.rooms import link_converted_post
 from app.services.xp import VALIDATOR_MIN_AGE_DAYS, grant_recipe_validated
 
 
@@ -45,6 +47,7 @@ async def get_recipe(session: AsyncSession, recipe_id: int) -> Post | None:
             selectinload(Post.tags),
             selectinload(Post.author),
             selectinload(Post.worked_reports).selectinload(WorkedReport.user),
+            selectinload(Post.source_message).selectinload(RoomMessage.room),
         )
     )
     return await session.scalar(stmt)
@@ -57,6 +60,7 @@ async def create_recipe(
     title: str,
     body: str,
     tag_ids: list[int],
+    source_message_id: int | None = None,
 ) -> Post:
     title_clean = title.strip()
     body_clean = body.strip()
@@ -75,6 +79,12 @@ async def create_recipe(
         tags=tags,
     )
     session.add(post)
+    await session.flush()
+    await link_converted_post(
+        session,
+        message_id=source_message_id,
+        post=post,
+    )
     await session.commit()
     await session.refresh(post)
     return post
