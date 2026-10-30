@@ -36,3 +36,15 @@ LoginUser = Annotated[User, Depends(require_login)]
 
 def is_onboarded(user: User) -> bool:
     return bool(user.handle and user.country and user.stack)
+
+
+async def require_onboarded(user: LoginUser) -> User:
+    if not is_onboarded(user):
+        raise HTTPException(
+            status_code=status.HTTP_303_SEE_OTHER,
+            headers={"Location": "/onboarding"},
+        )
+    return user
+
+
+OnboardedUser = Annotated[User, Depends(require_onboarded)]

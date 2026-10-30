@@ -23,6 +23,8 @@ dependencies = [
     "argon2-cffi",
     "httpx",
     "sse-starlette",
+    "markdown-it-py",
+    "nh3",
 ]
 
 [project.optional-dependencies]

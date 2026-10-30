@@ -1,0 +1,9 @@
+<form id="utile-{{ post_id }}"
+      hx-post="/posts/{{ post_id }}/utile"
+      hx-swap="outerHTML"
+      hx-target="this">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <button type="submit" {% if marked or not can_vote %}disabled{% endif %}>
+    {{ t("utile") }} · {{ count }}
+  </button>
+</form>

@@ -1,5 +1,27 @@
 {% extends "base.html" %}
 {% block title %}Palabre{% endblock %}
 {% block content %}
-  <h1>Palabre</h1>
+  <p>{{ t("pitch") }}</p>
+  <p>
+    {% for category, tags in tag_groups.items() %}
+      {% for tag in tags %}
+        <a class="pill" href="/?tag={{ tag.slug }}">{{ tag.label }}</a>
+      {% endfor %}
+    {% endfor %}
+    {% if active_tag %}<a class="pill" href="/">Tous</a>{% endif %}
+  </p>
+  {% if not questions %}
+    <p>{{ t("feed_empty") }}</p>
+  {% endif %}
+  {% for q in questions %}
+    <article>
+      <h2><a href="/questions/{{ q.id }}">{{ q.title }}</a></h2>
+      <p>
+        {% for tag in q.tags %}
+          <a class="pill" href="/?tag={{ tag.slug }}">{{ tag.label }}</a>
+        {% endfor %}
+      </p>
+      <p>{{ q.author.handle or q.author.email }}</p>
+    </article>
+  {% endfor %}
 {% endblock %}

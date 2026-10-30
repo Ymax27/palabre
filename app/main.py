@@ -8,7 +8,7 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from app.core.config import settings
 from app.core.db import engine
-from app.routers import auth, health, home
+from app.routers import auth, health, home, questions
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
 
@@ -33,6 +33,7 @@ def create_app() -> FastAPI:
     application.include_router(health.router)
     application.include_router(home.router)
     application.include_router(auth.router)
+    application.include_router(questions.router)
     return application
 
 

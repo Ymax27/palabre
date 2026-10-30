@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}{{ question.title }} · Palabre{% endblock %}
+{% block content %}
+  <article>
+    <h1>{{ question.title }}</h1>
+    <p>
+      {% for tag in question.tags %}
+        <a class="pill" href="/?tag={{ tag.slug }}">{{ tag.label }}</a>
+      {% endfor %}
+    </p>
+    <div>{{ question.body | md }}</div>
+    <p>{{ question.author.handle or question.author.email }}</p>
+  </article>
+
+  <h2>Réponses</h2>
+  {% if not question.answers %}
+    <p>{{ t("answers_empty") }}</p>
+  {% endif %}
+  {% for answer in question.answers %}
+    <article class="{% if question.accepted_answer_id == answer.id %}accepted{% endif %}">
+      {% if question.accepted_answer_id == answer.id %}
+        <p><strong>{{ t("accepted") }}</strong></p>
+      {% endif %}
+      <div>{{ answer.body | md }}</div>
+      <p>{{ answer.author.handle or answer.author.email }}</p>
+      {% if user %}
+        {% set post_id = answer.id %}
+        {% set count = utile_counts[answer.id] %}
+        {% set marked = utile_mine[answer.id] %}
+        {% set can_vote = answer.author_id != user.id %}
+        {% include "partials/utile.html" %}
+      {% endif %}
+      {% if user and user.id == question.author_id and not question.accepted_answer_id and answer.author_id != user.id %}
+        <form method="post" action="/questions/{{ question.id }}/accepter/{{ answer.id }}">
+          <input type="hidden" name="csrf" value="{{ csrf }}">
+          <button type="submit">{{ t("accept") }}</button>
+        </form>
+      {% endif %}
+    </article>
+  {% endfor %}
+
+  {% if user and user.handle %}
+    <h2>Répondre</h2>
+    <form method="post" action="/questions/{{ question.id }}/reponses">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <label for="body">Réponse (markdown)</label>
+      <textarea id="body" name="body" rows="8" required></textarea>
+      <p><button type="submit">Publier</button></p>
+    </form>
+  {% else %}
+    <p><a href="/connexion">Connecte-toi</a> pour répondre.</p>
+  {% endif %}
+{% endblock %}
