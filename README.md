@@ -25,6 +25,8 @@ pip install -e ".[dev]"
 docker compose up -d
 alembic upgrade head
 # équivalent : docker compose exec app alembic upgrade head
+python -m app.seed
+# équivalent : docker compose exec app python -m app.seed
 curl -sf localhost:8000/health
 ```
 
