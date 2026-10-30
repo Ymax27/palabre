@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.countries import AFRICAN_COUNTRIES
 from app.core.deps import CurrentUser, OnboardedUser, SessionDep
 from app.core.i18n import t
+from app.core.limiter import limiter
 from app.core.security import require_csrf
 from app.core.templates import templates, view_context
 from app.models.post import Post
@@ -69,6 +70,7 @@ async def recipe_form(
 
 
 @router.post("/recettes")
+@limiter.limit("10/minute")
 async def recipe_submit(
     request: Request,
     session: SessionDep,

@@ -3,6 +3,7 @@ from fastapi.responses import HTMLResponse
 
 from app.core.deps import CurrentUser, SessionDep
 from app.core.i18n import t
+from app.core.limiter import limiter
 from app.core.templates import templates, view_context
 from app.services.qa import tags_grouped
 from app.services.search import search_posts, similar_questions
@@ -11,6 +12,7 @@ router = APIRouter()
 
 
 @router.get("/recherche", response_class=HTMLResponse)
+@limiter.limit("30/minute")
 async def search_page(
     request: Request,
     session: SessionDep,

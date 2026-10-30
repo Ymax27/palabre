@@ -4,11 +4,13 @@ from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
+from slowapi.errors import RateLimitExceeded
 from starlette.middleware.sessions import SessionMiddleware
 
 from app.core.bus import close_redis
 from app.core.config import settings
 from app.core.db import engine
+from app.core.limiter import limiter, rate_limit_exceeded_handler
 from app.routers import (
     auth,
     coupe,
@@ -40,6 +42,11 @@ def create_app() -> FastAPI:
         https_only=not settings.debug,
         same_site="lax",
         max_age=14 * 24 * 3600,
+    )
+    application.state.limiter = limiter
+    application.add_exception_handler(
+        RateLimitExceeded,
+        rate_limit_exceeded_handler,  # type: ignore[arg-type]
     )
     application.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
     application.include_router(health.router)

@@ -27,6 +27,7 @@ dependencies = [
     "nh3",
     "authlib",
     "redis",
+    "slowapi",
 ]
 
 [project.optional-dependencies]

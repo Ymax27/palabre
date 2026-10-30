@@ -6,6 +6,7 @@ STRINGS: dict[str, str] = {
     "nav_search": "Rechercher",
     "palette_title": "Aller à",
     "palette_placeholder": "Rechercher ou choisir une page",
+    "rate_limited": "Trop de tentatives. Réessaie dans une minute.",
     "search_query": "Mots-clés",
     "search_empty": "Aucun résultat pour cette recherche.",
     "search_all": "Tous",

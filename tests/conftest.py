@@ -7,6 +7,7 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import SessionLocal, engine
+from app.core.limiter import limiter
 from app.core.rate_limit import reset as reset_rate_limit
 from app.main import app
 from app.models.user import User
@@ -17,6 +18,7 @@ MakeUser = Callable[..., Awaitable[User]]
 @pytest.fixture(autouse=True)
 async def clean_db() -> AsyncIterator[None]:
     reset_rate_limit()
+    limiter.reset()
     async with SessionLocal() as session:
         await session.execute(
             text(

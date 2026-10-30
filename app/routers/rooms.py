@@ -10,6 +10,7 @@ from sse_starlette.sse import EventSourceResponse
 from app.core.bus import publish_room, subscribe_room
 from app.core.deps import CurrentUser, OnboardedUser, SessionDep
 from app.core.i18n import t
+from app.core.limiter import limiter
 from app.core.security import require_csrf
 from app.core.templates import templates, view_context
 from app.models.enums import PostType
@@ -111,6 +112,7 @@ async def room_detail(
 
 
 @router.post("/salons/{slug}/messages", response_class=HTMLResponse)
+@limiter.limit("20/minute")
 async def room_post_message(
     request: Request,
     session: SessionDep,
