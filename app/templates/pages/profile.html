@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}{{ profile.user.handle }} · Palabre{% endblock %}
+{% block content %}
+  <h1>@{{ profile.user.handle }}</h1>
+  <p>
+    {% if profile.country_label %}{{ profile.country_label }}{% endif %}
+    {% if profile.user.stack %} · {{ profile.user.stack }}{% endif %}
+  </p>
+  <p><strong>{{ profile.xp }} XP</strong> · {{ niveau_label }}</p>
+
+  <h2>{{ t("profile_questions") }}</h2>
+  {% if not profile.questions %}
+    <p>{{ t("profile_none") }}</p>
+  {% endif %}
+  {% for q in profile.questions %}
+    <article>
+      <h3><a href="/questions/{{ q.id }}">{{ q.title }}</a></h3>
+    </article>
+  {% endfor %}
+
+  <h2>{{ t("profile_answers") }}</h2>
+  {% if not profile.answers %}
+    <p>{{ t("profile_none") }}</p>
+  {% endif %}
+  {% for a in profile.answers %}
+    <article>
+      {% if a.parent and a.parent.title %}
+        <h3><a href="/questions/{{ a.parent_id }}">{{ a.parent.title }}</a></h3>
+      {% endif %}
+      <div>{{ a.body | md }}</div>
+    </article>
+  {% endfor %}
+
+  <h2>{{ t("profile_recipes") }}</h2>
+  {% if not profile.recipes %}
+    <p>{{ t("profile_none") }}</p>
+  {% endif %}
+  {% for r in profile.recipes %}
+    <article>
+      <h3><a href="/recettes/{{ r.id }}">{{ r.title }}</a></h3>
+    </article>
+  {% endfor %}
+{% endblock %}

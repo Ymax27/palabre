@@ -9,7 +9,7 @@
       {% endfor %}
     </p>
     <div>{{ question.body | md }}</div>
-    <p>{{ question.author.handle or question.author.email }}</p>
+    <p>{% set author = question.author %}{% include "partials/author.html" %}</p>
   </article>
 
   <h2>Réponses</h2>
@@ -22,7 +22,7 @@
         <p><strong>{{ t("accepted") }}</strong></p>
       {% endif %}
       <div>{{ answer.body | md }}</div>
-      <p>{{ answer.author.handle or answer.author.email }}</p>
+      <p>{% set author = answer.author %}{% include "partials/author.html" %}</p>
       {% if user %}
         {% set post_id = answer.id %}
         {% set count = utile_counts[answer.id] %}

@@ -16,7 +16,7 @@
           <a class="pill" href="/recettes?tag={{ tag.slug }}">{{ tag.label }}</a>
         {% endfor %}
       </p>
-      <p>{{ recipe.author.handle or recipe.author.email }}</p>
+      <p>{% set author = recipe.author %}{% include "partials/author.html" %}</p>
     </article>
   {% endfor %}
 {% endblock %}

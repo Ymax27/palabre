@@ -9,7 +9,7 @@
       {% endfor %}
     </p>
     <div>{{ recipe.body | md }}</div>
-    <p>{{ recipe.author.handle or recipe.author.email }}</p>
+    <p>{% set author = recipe.author %}{% include "partials/author.html" %}</p>
   </article>
   {% include "partials/marche.html" %}
 {% endblock %}

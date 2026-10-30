@@ -116,7 +116,11 @@
         <span class="xp-pill" id="xp-pill">{{ xp }} XP</span>
       {% endif %}
       {% if user is defined and user %}
-        <span>{{ user.handle or user.email }}</span>
+        {% if user.handle %}
+          <a href="/u/{{ user.handle }}">{{ user.handle }}</a>
+        {% else %}
+          <span>{{ user.email }}</span>
+        {% endif %}
         <form method="post" action="/deconnexion">
           <input type="hidden" name="csrf" value="{{ csrf }}">
           <button type="submit" class="secondary">{{ t("nav_logout") }}</button>

@@ -1,0 +1,5 @@
+{% if author and author.handle %}
+  <a href="/u/{{ author.handle }}">{{ author.handle }}</a>
+{% elif author %}
+  {{ author.email }}
+{% endif %}

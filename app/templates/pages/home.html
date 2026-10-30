@@ -21,7 +21,7 @@
           <a class="pill" href="/?tag={{ tag.slug }}">{{ tag.label }}</a>
         {% endfor %}
       </p>
-      <p>{{ q.author.handle or q.author.email }}</p>
+      <p>{% set author = q.author %}{% include "partials/author.html" %}</p>
     </article>
   {% endfor %}
 {% endblock %}

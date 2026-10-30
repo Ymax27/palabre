@@ -38,6 +38,14 @@ STRINGS: dict[str, str] = {
     "marche_bad_country": "Choisis un pays dans la liste.",
     "marche_empty": "Indique l'environnement (versions, réseau, paiement).",
     "marche_error": "Impossible d'enregistrer cette validation.",
+    "level_nouveau": "Nouveau",
+    "level_membre": "Membre",
+    "level_pilier": "Pilier",
+    "level_ancien": "Ancien",
+    "profile_questions": "Questions",
+    "profile_answers": "Réponses",
+    "profile_recipes": "Recettes",
+    "profile_none": "Pas encore de contribution ici.",
 }
 
 
