@@ -1,0 +1,7 @@
+<article
+  id="message-{{ message.id }}"
+  class="room-message{% if message.needs_help %} needs-help{% endif %}{% if message.parent_id %} reply{% endif %}"
+>
+  <p>{% set author = message.author %}{% include "partials/author.html" %}</p>
+  <div>{{ message.body | md }}</div>
+</article>

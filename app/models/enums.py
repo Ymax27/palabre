@@ -29,3 +29,8 @@ class XpReason(StrEnum):
     RECIPE_PUBLISHED = "recipe_published"
     RECIPE_VALIDATED_AUTHOR = "recipe_validated_author"
     RECIPE_VALIDATED_VALIDATOR = "recipe_validated_validator"
+
+
+class RoomKind(StrEnum):
+    PAYS = "pays"
+    THEME = "theme"

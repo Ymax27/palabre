@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}{{ room.title }} · Palabre{% endblock %}
+{% block content %}
+  <p><a href="/salons">{{ t("nav_rooms") }}</a></p>
+  <h1>{{ room.title }}</h1>
+  <div
+    x-data="roomStream('{{ room.slug }}')"
+    x-init="open()"
+  >
+    <p x-show="status === 'retry'" role="status">{{ t("rooms_reconnect") }}</p>
+    <div id="messages">
+      {% for message in messages %}
+        {% include "partials/message.html" %}
+      {% endfor %}
+    </div>
+  </div>
+  {% if user and user.handle %}
+    <form
+      method="post"
+      action="/salons/{{ room.slug }}/messages"
+      hx-post="/salons/{{ room.slug }}/messages"
+      hx-target="#messages"
+      hx-swap="beforeend"
+      hx-on::after-request="if (event.detail.successful) this.reset()"
+    >
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <label for="body">{{ t("rooms_message") }}</label>
+      <textarea id="body" name="body" rows="4" required></textarea>
+      <p><button type="submit">{{ t("rooms_send") }}</button></p>
+    </form>
+  {% else %}
+    <p><a href="/connexion">{{ t("nav_login") }}</a> {{ t("rooms_login") }}</p>
+  {% endif %}
+{% endblock %}
+{% block scripts %}
+  <script>
+    document.addEventListener("alpine:init", function () {
+      Alpine.data("roomStream", function (slug) {
+        return {
+          status: "ok",
+          retryMs: 1000,
+          source: null,
+          open() {
+            const self = this;
+            if (self.source) {
+              self.source.close();
+            }
+            const es = new EventSource("/salons/" + slug + "/events");
+            self.source = es;
+            es.onopen = function () {
+              self.status = "ok";
+              self.retryMs = 1000;
+            };
+            es.onmessage = function (event) {
+              let html;
+              try {
+                html = JSON.parse(event.data);
+              } catch {
+                html = event.data;
+              }
+              const box = document.createElement("div");
+              box.innerHTML = html.trim();
+              const node = box.firstElementChild;
+              if (!node) {
+                return;
+              }
+              if (node.id && document.getElementById(node.id)) {
+                return;
+              }
+              const list = document.getElementById("messages");
+              if (list) {
+                list.appendChild(node);
+              }
+            };
+            es.onerror = function () {
+              self.status = "retry";
+              es.close();
+              const wait = self.retryMs;
+              self.retryMs = Math.min(self.retryMs * 2, 15000);
+              setTimeout(function () {
+                self.open();
+              }, wait);
+            };
+          },
+        };
+      });
+    });
+  </script>
+{% endblock %}

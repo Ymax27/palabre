@@ -2,8 +2,14 @@ STRINGS: dict[str, str] = {
     "nav_home": "Accueil",
     "nav_coupe": "Coupe",
     "nav_ask": "Poser",
+    "nav_rooms": "Salons",
     "nav_login": "Connexion",
     "nav_logout": "Déconnexion",
+    "rooms_intro": "Des salons par pays et par thème. Le chat ne rapporte aucun XP.",
+    "rooms_message": "Message (markdown)",
+    "rooms_send": "Envoyer",
+    "rooms_login": "pour écrire dans le salon.",
+    "rooms_reconnect": "Connexion instable. On réessaie, ton texte est gardé.",
     "pitch": (
         "Ici, les devs africains se répondent, se valident et font monter leur pays."
     ),

@@ -6,9 +6,10 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 
+from app.core.bus import close_redis
 from app.core.config import settings
 from app.core.db import engine
-from app.routers import auth, coupe, health, home, profile, questions, recipes
+from app.routers import auth, coupe, health, home, profile, questions, recipes, rooms
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
 
@@ -16,6 +17,7 @@ STATIC_DIR = Path(__file__).resolve().parent / "static"
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     yield
+    await close_redis()
     await engine.dispose()
 
 
@@ -37,6 +39,7 @@ def create_app() -> FastAPI:
     application.include_router(recipes.router)
     application.include_router(profile.router)
     application.include_router(coupe.router)
+    application.include_router(rooms.router)
     return application
 
 

@@ -9,6 +9,7 @@ from app.models.base import Base
 
 if TYPE_CHECKING:
     from app.models.reaction import Reaction
+    from app.models.room_message import RoomMessage
     from app.models.tag import Tag
     from app.models.user import User
     from app.models.worked_report import WorkedReport
@@ -35,6 +36,9 @@ class Post(Base):
     )
     accepted_answer_id: Mapped[int | None] = mapped_column(
         ForeignKey("posts.id", ondelete="SET NULL"),
+    )
+    source_message_id: Mapped[int | None] = mapped_column(
+        ForeignKey("room_messages.id", ondelete="SET NULL"),
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -75,3 +79,7 @@ class Post(Base):
     )
     reactions: Mapped[list["Reaction"]] = relationship(back_populates="post")
     worked_reports: Mapped[list["WorkedReport"]] = relationship(back_populates="post")
+    source_message: Mapped["RoomMessage | None"] = relationship(
+        foreign_keys=[source_message_id],
+        post_update=True,
+    )

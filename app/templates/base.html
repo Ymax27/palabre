@@ -73,6 +73,8 @@
         margin-bottom: var(--s-4);
       }
       article.accepted { border-color: var(--leaf-500); }
+      article.needs-help { border-color: var(--info-500); }
+      article.reply { margin-left: var(--s-6); }
       label { display: block; margin-top: var(--s-3); }
       input, textarea, select {
         width: 100%;
@@ -98,13 +100,13 @@
         }
       }
     </style>
-    <script src="/static/vendor/htmx.min.js" defer></script>
   </head>
   <body>
     <header>
       <strong><a href="/" style="color: inherit; text-decoration: none;">Palabre</a></strong>
       <nav>
         <a href="/">{{ t("nav_home") }}</a>
+        <a href="/salons">{{ t("nav_rooms") }}</a>
         <a href="/recettes">{{ t("nav_recipes") }}</a>
         <a href="/coupe">{{ t("nav_coupe") }}</a>
         {% if user is defined and user and user.handle %}
@@ -132,5 +134,8 @@
     <main>
       {% block content %}{% endblock %}
     </main>
+    {% block scripts %}{% endblock %}
+    <script src="/static/vendor/htmx.min.js" defer></script>
+    <script src="/static/vendor/alpine.min.js" defer></script>
   </body>
 </html>

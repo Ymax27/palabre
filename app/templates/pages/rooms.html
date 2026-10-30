@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}{{ t("nav_rooms") }} · Palabre{% endblock %}
+{% block content %}
+  <h1>{{ t("nav_rooms") }}</h1>
+  <p>{{ t("rooms_intro") }}</p>
+  <ul>
+    {% for room in rooms %}
+      <li>
+        <a href="/salons/{{ room.slug }}">{{ room.title }}</a>
+        {% if room.kind == "pays" and room.country %}
+          <span class="pill">{{ room.country }}</span>
+        {% else %}
+          <span class="pill">{{ room.kind }}</span>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+{% endblock %}
