@@ -76,6 +76,30 @@
       article.needs-help { border-color: var(--info-500); }
       article.reply { margin-left: var(--s-6); }
       mark { background: var(--ochre-400); color: var(--ink-900); }
+      [x-cloak] { display: none !important; }
+      .palette-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(17, 18, 43, 0.45);
+        z-index: 50;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        padding: 10vh var(--s-4);
+      }
+      .palette {
+        width: min(32rem, 100%);
+        margin: 0;
+      }
+      .palette ul { list-style: none; margin: var(--s-3) 0 0; padding: 0; }
+      .palette a {
+        display: block;
+        padding: var(--s-2) var(--s-3);
+        border-radius: var(--r-sm);
+        text-decoration: none;
+        color: inherit;
+      }
+      .palette a.is-active { background: var(--sand-100); }
       label { display: block; margin-top: var(--s-3); }
       input, textarea, select {
         width: 100%;
@@ -91,6 +115,7 @@
       @media (prefers-color-scheme: dark) {
         body { background: var(--ink-900); color: var(--sand-50); }
         header, article, .card { background: var(--ink-800); border-color: var(--ink-700); }
+        .palette a.is-active { background: var(--ink-700); }
         a { color: var(--ochre-400); }
         input, textarea, select { background: var(--ink-900); color: var(--sand-50); border-color: var(--ink-700); }
       }
@@ -103,6 +128,61 @@
     </style>
   </head>
   <body>
+    <div
+      x-data='commandPalette({
+        handle: {% if user is defined and user and user.handle %}{{ user.handle|tojson }}{% else %}null{% endif %},
+        searchLabel: {{ t("nav_search")|tojson }},
+        items: [
+          {"label": {{ t("nav_search")|tojson }}, "href": "/recherche"},
+          {"label": {{ t("nav_rooms")|tojson }}, "href": "/salons"},
+          {"label": {{ t("ask_title")|tojson }}, "href": "/questions/nouvelle"},
+          {"label": {{ t("recipe_new")|tojson }}, "href": "/recettes/nouvelle"},
+          {"label": {{ t("nav_coupe")|tojson }}, "href": "/coupe"}
+        ]
+      })'
+      @keydown.window="onKey($event)"
+    >
+      <div
+        class="palette-backdrop"
+        x-show="open"
+        x-cloak
+        @click.self="close()"
+      >
+        <div
+          class="card palette"
+          x-ref="dialog"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="palette-title"
+          @keydown="trap($event)"
+        >
+          <h2 id="palette-title">{{ t("palette_title") }}</h2>
+          <label for="palette-q">{{ t("palette_placeholder") }}</label>
+          <input
+            id="palette-q"
+            x-ref="q"
+            type="search"
+            x-model="query"
+            @input="index = 0"
+            autocomplete="off"
+          >
+          <ul>
+            <template x-for="(item, i) in filtered()" :key="item.href">
+              <li>
+                <a
+                  :href="item.href"
+                  :class="i === index ? 'is-active' : ''"
+                  :aria-current="i === index ? 'true' : null"
+                  x-text="item.label"
+                  @mouseenter="index = i"
+                  @click="open = false"
+                ></a>
+              </li>
+            </template>
+          </ul>
+        </div>
+      </div>
+    </div>
     <header>
       <strong><a href="/" style="color: inherit; text-decoration: none;">Palabre</a></strong>
       <nav>
@@ -137,6 +217,117 @@
       {% block content %}{% endblock %}
     </main>
     {% block scripts %}{% endblock %}
+    <script>
+      document.addEventListener("alpine:init", function () {
+        Alpine.data("commandPalette", function (opts) {
+          return {
+            open: false,
+            query: "",
+            index: 0,
+            handle: opts.handle,
+            searchLabel: opts.searchLabel,
+            items: opts.items,
+            filtered() {
+              const q = this.query.trim().toLowerCase();
+              const extra = [];
+              if (q) {
+                extra.push({
+                  label: this.searchLabel + " « " + this.query.trim() + " »",
+                  href: "/recherche?q=" + encodeURIComponent(this.query.trim()),
+                });
+              }
+              const rest = this.items.filter(function (item) {
+                return !q || item.label.toLowerCase().indexOf(q) !== -1;
+              });
+              if (this.handle) {
+                const profile = {
+                  label: this.handle,
+                  href: "/u/" + this.handle,
+                };
+                if (!q || profile.label.toLowerCase().indexOf(q) !== -1) {
+                  rest.push(profile);
+                }
+              }
+              return extra.concat(rest);
+            },
+            onKey(event) {
+              if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+                event.preventDefault();
+                this.toggle();
+              }
+            },
+            toggle() {
+              this.open = !this.open;
+              if (this.open) {
+                this.query = "";
+                this.index = 0;
+                const self = this;
+                this.$nextTick(function () {
+                  if (self.$refs.q) {
+                    self.$refs.q.focus();
+                  }
+                });
+              }
+            },
+            close() {
+              this.open = false;
+            },
+            move(delta) {
+              const n = this.filtered().length;
+              if (!n) {
+                return;
+              }
+              this.index = (this.index + delta + n) % n;
+            },
+            choose() {
+              const item = this.filtered()[this.index];
+              if (item) {
+                window.location.href = item.href;
+              }
+            },
+            trap(event) {
+              if (event.key === "Escape") {
+                event.preventDefault();
+                this.close();
+                return;
+              }
+              if (event.key === "ArrowDown") {
+                event.preventDefault();
+                this.move(1);
+              }
+              if (event.key === "ArrowUp") {
+                event.preventDefault();
+                this.move(-1);
+              }
+              if (event.key === "Enter") {
+                event.preventDefault();
+                this.choose();
+              }
+              if (event.key !== "Tab") {
+                return;
+              }
+              const root = this.$refs.dialog;
+              if (!root) {
+                return;
+              }
+              const list = root.querySelectorAll("input, a, button");
+              if (!list.length) {
+                return;
+              }
+              const first = list[0];
+              const last = list[list.length - 1];
+              if (event.shiftKey && document.activeElement === first) {
+                event.preventDefault();
+                last.focus();
+              } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault();
+                first.focus();
+              }
+            },
+          };
+        });
+      });
+    </script>
     <script src="/static/vendor/htmx.min.js" defer></script>
     <script src="/static/vendor/alpine.min.js" defer></script>
   </body>

@@ -4,6 +4,8 @@ STRINGS: dict[str, str] = {
     "nav_ask": "Poser",
     "nav_rooms": "Salons",
     "nav_search": "Rechercher",
+    "palette_title": "Aller à",
+    "palette_placeholder": "Rechercher ou choisir une page",
     "search_query": "Mots-clés",
     "search_empty": "Aucun résultat pour cette recherche.",
     "search_all": "Tous",
