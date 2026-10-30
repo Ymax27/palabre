@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}{{ t("recipe_new") }} · Palabre{% endblock %}
+{% block content %}
+  <h1>{{ t("recipe_new") }}</h1>
+  {% if error %}<p role="alert">{{ error }}</p>{% endif %}
+  <form method="post" action="/recettes">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <label for="title">Titre</label>
+    <input id="title" name="title" required maxlength="200">
+    <label for="body">{{ t("recipe_steps") }}</label>
+    <textarea id="body" name="body" rows="12" required placeholder="1. Prérequis&#10;2. Étapes&#10;3. Limites"></textarea>
+    {% for category, tags in tag_groups.items() %}
+      <fieldset class="tag-group">
+        <legend>{{ category }}{% if category == "pays" %} (au moins un){% endif %}</legend>
+        {% for tag in tags %}
+          <label>
+            <input type="checkbox" name="tag_id" value="{{ tag.id }}">
+            {{ tag.label }}
+          </label>
+        {% endfor %}
+      </fieldset>
+    {% endfor %}
+    <p><button type="submit">{{ t("recipe_publish") }}</button></p>
+  </form>
+{% endblock %}

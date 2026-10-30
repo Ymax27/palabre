@@ -33,5 +33,5 @@ class WorkedReport(Base):
         server_default=func.now(),
     )
 
-    post: Mapped["Post"] = relationship()
+    post: Mapped["Post"] = relationship(back_populates="worked_reports")
     user: Mapped["User"] = relationship()

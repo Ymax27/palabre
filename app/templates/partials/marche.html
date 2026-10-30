@@ -1,0 +1,34 @@
+<div id="marche-{{ recipe.id }}">
+  {% if error %}<p role="alert">{{ error }}</p>{% endif %}
+  {% if counts %}
+    <p>
+      {{ t("marche") }}
+      {% for code, n in counts.items() %}
+        · {{ code }} {{ n }}
+      {% endfor %}
+    </p>
+  {% endif %}
+  {% if user and can_report %}
+    <form hx-post="/recettes/{{ recipe.id }}/marche"
+          hx-target="#marche-{{ recipe.id }}"
+          hx-swap="outerHTML">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <label for="country-{{ recipe.id }}">Pays</label>
+      <select id="country-{{ recipe.id }}" name="country" required>
+        {% for code, label in countries %}
+          <option value="{{ code }}" {% if user.country == code %}selected{% endif %}>
+            {{ label }}
+          </option>
+        {% endfor %}
+      </select>
+      <label for="environment-{{ recipe.id }}">{{ t("marche_env") }}</label>
+      <input id="environment-{{ recipe.id }}" name="environment" required maxlength="200"
+             placeholder="Python 3.12 · Orange Money · 4G">
+      <p><button type="submit" class="marche">{{ t("marche") }}</button></p>
+    </form>
+  {% elif marked %}
+    <p>{{ t("marche_done") }}</p>
+  {% elif not user %}
+    <p><a href="/connexion">{{ t("nav_login") }}</a> {{ t("marche_login") }}</p>
+  {% endif %}
+</div>

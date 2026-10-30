@@ -18,6 +18,26 @@ STRINGS: dict[str, str] = {
     "github_or": "ou par email",
     "nav_recipes": "Recettes",
     "nav_profile": "Profil",
+    "recipes_title": "Recettes",
+    "recipes_empty": (
+        "Personne n'a encore partagé de recette. Sois le premier sous l'arbre."
+    ),
+    "recipe_new": "Partager une recette",
+    "recipe_steps": "Étapes (markdown)",
+    "recipe_publish": "Publier",
+    "recipe_empty": "Recette incomplète.",
+    "marche": "Ça a marché chez moi",
+    "marche_env": "Environnement",
+    "marche_done": "Tu as confirmé que ça a marché chez toi.",
+    "marche_login": "pour confirmer que ça a marché chez toi.",
+    "marche_too_young": (
+        "Ton compte doit avoir au moins 3 jours pour valider une recette."
+    ),
+    "marche_own": "Tu ne peux pas valider ta propre recette.",
+    "marche_duplicate": "Tu as déjà confirmé cette recette.",
+    "marche_bad_country": "Choisis un pays dans la liste.",
+    "marche_empty": "Indique l'environnement (versions, réseau, paiement).",
+    "marche_error": "Impossible d'enregistrer cette validation.",
 }
 
 

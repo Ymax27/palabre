@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}{{ recipe.title }} · Palabre{% endblock %}
+{% block content %}
+  <article>
+    <h1>{{ recipe.title }}</h1>
+    <p>
+      {% for tag in recipe.tags %}
+        <a class="pill" href="/recettes?tag={{ tag.slug }}">{{ tag.label }}</a>
+      {% endfor %}
+    </p>
+    <div>{{ recipe.body | md }}</div>
+    <p>{{ recipe.author.handle or recipe.author.email }}</p>
+  </article>
+  {% include "partials/marche.html" %}
+{% endblock %}

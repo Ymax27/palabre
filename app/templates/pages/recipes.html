@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}{{ t("recipes_title") }} · Palabre{% endblock %}
+{% block content %}
+  <h1>{{ t("recipes_title") }}</h1>
+  {% if user is defined and user and user.handle %}
+    <p><a class="btn" href="/recettes/nouvelle">{{ t("recipe_new") }}</a></p>
+  {% endif %}
+  {% if not recipes %}
+    <p>{{ t("recipes_empty") }}</p>
+  {% endif %}
+  {% for recipe in recipes %}
+    <article>
+      <h2><a href="/recettes/{{ recipe.id }}">{{ recipe.title }}</a></h2>
+      <p>
+        {% for tag in recipe.tags %}
+          <a class="pill" href="/recettes?tag={{ tag.slug }}">{{ tag.label }}</a>
+        {% endfor %}
+      </p>
+      <p>{{ recipe.author.handle or recipe.author.email }}</p>
+    </article>
+  {% endfor %}
+{% endblock %}

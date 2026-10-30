@@ -23,7 +23,7 @@ AWARDS: dict[XpReason, int] = {
 DAILY_CAP = 100
 RECIPROCITY_LIMIT = 3
 RECIPROCITY_DAYS = 7
-VALIDATOR_MIN_DAYS = 3
+VALIDATOR_MIN_AGE_DAYS = 3
 
 _CHAT_REASONS = frozenset({"chat", "message", "room"})
 
@@ -152,7 +152,7 @@ async def grant_recipe_validated(
     author: User,
 ) -> tuple[int, int]:
     age = datetime.now(UTC) - validator.created_at
-    if age < timedelta(days=VALIDATOR_MIN_DAYS):
+    if age < timedelta(days=VALIDATOR_MIN_AGE_DAYS):
         return (0, 0)
     if validator.country is None or author.country is None:
         return (0, 0)

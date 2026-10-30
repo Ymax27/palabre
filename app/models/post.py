@@ -11,6 +11,7 @@ if TYPE_CHECKING:
     from app.models.reaction import Reaction
     from app.models.tag import Tag
     from app.models.user import User
+    from app.models.worked_report import WorkedReport
 
 
 class Post(Base):
@@ -73,3 +74,4 @@ class Post(Base):
         back_populates="posts",
     )
     reactions: Mapped[list["Reaction"]] = relationship(back_populates="post")
+    worked_reports: Mapped[list["WorkedReport"]] = relationship(back_populates="post")
