@@ -4,6 +4,10 @@ from time import monotonic
 _hits: dict[str, list[float]] = defaultdict(list)
 
 
+def reset() -> None:
+    _hits.clear()
+
+
 def allow(key: str, limit: int, window_seconds: int) -> bool:
     now = monotonic()
     recent = [stamp for stamp in _hits[key] if now - stamp < window_seconds]

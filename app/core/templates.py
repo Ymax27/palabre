@@ -14,6 +14,8 @@ from app.services.xp import total_xp
 
 TEMPLATES_DIR = Path(__file__).resolve().parent.parent / "templates"
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
+
+
 def _md_filter(source: str | None) -> Markup:
     return Markup(render_markdown(source or ""))
 

@@ -60,9 +60,7 @@ async def create_question(
         raise QaError("empty")
     if not tag_ids:
         raise QaError("need_country")
-    tags = list(
-        (await session.scalars(select(Tag).where(Tag.id.in_(tag_ids)))).all()
-    )
+    tags = list((await session.scalars(select(Tag).where(Tag.id.in_(tag_ids)))).all())
     if not any(tag.category == TagCategory.PAYS for tag in tags):
         raise QaError("need_country")
     post = Post(
@@ -129,9 +127,7 @@ async def mark_utile(
         )
     )
     if existing is None:
-        session.add(
-            Reaction(user_id=user.id, post_id=post.id, kind=ReactionKind.UTILE)
-        )
+        session.add(Reaction(user_id=user.id, post_id=post.id, kind=ReactionKind.UTILE))
         await session.commit()
     count = await session.scalar(
         select(func.count()).select_from(Reaction).where(Reaction.post_id == post.id)

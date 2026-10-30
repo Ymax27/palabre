@@ -27,14 +27,14 @@ async def request_magic_link(
     *,
     email: str,
     ip: str,
-) -> None:
+) -> str | None:
     email = normalize_email(email)
     if not email or "@" not in email:
-        return
+        return None
     if not allow(f"magic-email:{email}", 5, 15 * 60):
-        return
+        return None
     if not allow(f"magic-ip:{ip}", 20, 60 * 60):
-        return
+        return None
 
     token = magic_serializer().dumps({"e": email})
     expires = datetime.now(UTC) + timedelta(seconds=settings.magic_link_ttl_seconds)
@@ -48,6 +48,7 @@ async def request_magic_link(
     await session.commit()
     url = f"{settings.app_base_url.rstrip('/')}/auth/magic?token={token}"
     await send_magic_link(email, url)
+    return token
 
 
 async def consume_magic_link(session: AsyncSession, token: str) -> User:
