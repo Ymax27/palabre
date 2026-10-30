@@ -17,6 +17,8 @@ class Settings(BaseSettings):
     smtp_password: str = ""
     smtp_from: str = "palabre@localhost"
     session_cookie_name: str = "palabre_session"
+    github_client_id: str = ""
+    github_client_secret: str = ""
 
 
 settings = Settings()

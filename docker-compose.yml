@@ -32,6 +32,8 @@ services:
       SECRET_KEY: ${SECRET_KEY:-must-be-set-locally}
       DEBUG: ${DEBUG:-true}
       APP_BASE_URL: ${APP_BASE_URL:-http://localhost:8000}
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}
     depends_on:
       postgres:
         condition: service_healthy

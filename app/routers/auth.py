@@ -1,14 +1,26 @@
+from typing import Any, cast
+
+from authlib.integrations.starlette_client import OAuthError  # type: ignore[import-untyped]
 from fastapi import APIRouter, Form, Request, status
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from sqlalchemy import select
 
+from app.core.config import settings
 from app.core.countries import AFRICAN_COUNTRIES, COUNTRY_CODES
 from app.core.deps import CurrentUser, LoginUser, SessionDep, is_onboarded
+from app.core.oauth import github_client, github_configured
 from app.core.security import csrf_token, require_csrf
 from app.core.templates import templates
 from app.models.tag import Tag
 from app.models.user import User
-from app.services.auth import MagicLinkError, consume_magic_link, request_magic_link
+from app.services.auth import (
+    GitHubAuthError,
+    MagicLinkError,
+    consume_magic_link,
+    github_verified_email,
+    login_or_link_github,
+    request_magic_link,
+)
 
 router = APIRouter()
 
@@ -27,7 +39,10 @@ async def connexion_form(request: Request, user: CurrentUser) -> Response:
     return templates.TemplateResponse(
         request,
         "pages/connexion.html",
-        {"csrf": csrf_token(request)},
+        {
+            "csrf": csrf_token(request),
+            "github_enabled": github_configured(),
+        },
     )
 
 
@@ -60,6 +75,48 @@ async def magic_consume(
         return templates.TemplateResponse(
             request,
             "pages/magic_invalide.html",
+            {},
+            status_code=status.HTTP_400_BAD_REQUEST,
+        )
+    request.session["uid"] = user.id
+    target = "/" if is_onboarded(user) else "/onboarding"
+    return RedirectResponse(target, status_code=status.HTTP_303_SEE_OTHER)
+
+
+@router.get("/auth/github")
+async def github_start(request: Request) -> Response:
+    client = github_client()
+    if client is None:
+        return RedirectResponse("/connexion", status_code=status.HTTP_303_SEE_OTHER)
+    redirect_uri = f"{settings.app_base_url.rstrip('/')}/auth/github/callback"
+    return cast(Response, await client.authorize_redirect(request, redirect_uri))
+
+
+@router.get("/auth/github/callback")
+async def github_callback(request: Request, session: SessionDep) -> Response:
+    client = github_client()
+    if client is None:
+        return RedirectResponse("/connexion", status_code=status.HTTP_303_SEE_OTHER)
+    try:
+        token = await client.authorize_access_token(request)
+        profile_resp = await client.get("user", token=token)
+        emails_resp = await client.get("user/emails", token=token)
+        profile = cast(dict[str, Any], profile_resp.json())
+        emails_raw = emails_resp.json()
+        emails = emails_raw if isinstance(emails_raw, list) else None
+        email = github_verified_email(profile, emails)
+        github_id = str(profile.get("id") or "")
+        if not email or not github_id:
+            raise GitHubAuthError("no_email")
+        user = await login_or_link_github(
+            session,
+            github_id=github_id,
+            email=email,
+        )
+    except (OAuthError, GitHubAuthError, TypeError, ValueError, AttributeError):
+        return templates.TemplateResponse(
+            request,
+            "pages/github_invalide.html",
             {},
             status_code=status.HTTP_400_BAD_REQUEST,
         )

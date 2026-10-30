@@ -2,6 +2,10 @@
 {% block title %}Connexion · Palabre{% endblock %}
 {% block content %}
   <h1>Connexion</h1>
+  {% if github_enabled %}
+    <p><a class="btn" href="/auth/github">{{ t("github_continue") }}</a></p>
+    <p>{{ t("github_or") }}</p>
+  {% endif %}
   <p>On t'envoie un lien magique. Pas de mot de passe.</p>
   <form method="post" action="/connexion">
     <input type="hidden" name="csrf" value="{{ csrf }}">

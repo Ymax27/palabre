@@ -1,4 +1,5 @@
 from datetime import UTC, datetime, timedelta
+from typing import Any
 
 from itsdangerous import BadSignature, SignatureExpired
 from sqlalchemy import select
@@ -13,6 +14,12 @@ from app.models.user import User
 
 
 class MagicLinkError(Exception):
+    def __init__(self, code: str) -> None:
+        super().__init__(code)
+        self.code = code
+
+
+class GitHubAuthError(Exception):
     def __init__(self, code: str) -> None:
         super().__init__(code)
         self.code = code
@@ -82,6 +89,56 @@ async def consume_magic_link(session: AsyncSession, token: str) -> User:
         user = User(email=email)
         session.add(user)
         await session.flush()
+    await session.commit()
+    await session.refresh(user)
+    return user
+
+
+def github_verified_email(
+    _profile: dict[str, Any],
+    emails: list[Any] | None,
+) -> str | None:
+    if not emails:
+        return None
+    verified: list[str] = []
+    for item in emails:
+        if not isinstance(item, dict):
+            continue
+        if not item.get("verified"):
+            continue
+        raw = item.get("email")
+        if not isinstance(raw, str) or "@" not in raw:
+            continue
+        if item.get("primary"):
+            return raw
+        verified.append(raw)
+    return verified[0] if verified else None
+
+
+async def login_or_link_github(
+    session: AsyncSession,
+    *,
+    github_id: str,
+    email: str,
+) -> User:
+    email = normalize_email(email)
+    github_id = github_id.strip()
+    if not github_id or not email or "@" not in email:
+        raise GitHubAuthError("no_email")
+
+    by_github = await session.scalar(select(User).where(User.github_id == github_id))
+    if by_github is not None:
+        return by_github
+
+    by_email = await session.scalar(select(User).where(User.email == email))
+    if by_email is not None:
+        by_email.github_id = github_id
+        await session.commit()
+        await session.refresh(by_email)
+        return by_email
+
+    user = User(email=email, github_id=github_id)
+    session.add(user)
     await session.commit()
     await session.refresh(user)
     return user

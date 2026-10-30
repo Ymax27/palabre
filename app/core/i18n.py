@@ -14,6 +14,10 @@ STRINGS: dict[str, str] = {
     "accepted": "Réponse acceptée",
     "ask_title": "Poser une question",
     "need_country_tag": "Ajoute au moins un tag de pays.",
+    "github_continue": "Continuer avec GitHub",
+    "github_or": "ou par email",
+    "nav_recipes": "Recettes",
+    "nav_profile": "Profil",
 }
 
 

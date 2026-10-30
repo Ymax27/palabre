@@ -17,6 +17,7 @@ class User(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     handle: Mapped[str | None] = mapped_column(String(40), unique=True)
     email: Mapped[str] = mapped_column(String(320), unique=True, index=True)
+    github_id: Mapped[str | None] = mapped_column(String(32), unique=True)
     country: Mapped[str | None] = mapped_column(String(2))
     stack: Mapped[str | None] = mapped_column(String(80))
     niveau: Mapped[int] = mapped_column(SmallInteger, default=0, server_default="0")

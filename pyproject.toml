@@ -25,6 +25,7 @@ dependencies = [
     "sse-starlette",
     "markdown-it-py",
     "nh3",
+    "authlib",
 ]
 
 [project.optional-dependencies]
