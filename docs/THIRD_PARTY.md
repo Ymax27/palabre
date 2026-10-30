@@ -16,6 +16,10 @@ Licences des dépendances directes. Interdites : GPL, AGPL, LGPL. Le scan CI (`p
 | argon2-cffi | MIT | Hachage de secrets |
 | httpx | BSD-3-Clause | Client HTTP async |
 | sse-starlette | BSD-3-Clause | Server-Sent Events |
+| markdown-it-py | MIT | Rendu Markdown utilisateur |
+| mdurl | MIT | Transitive directe de `markdown-it-py` |
+| nh3 | MIT | Assainissement HTML après le rendu Markdown |
+| HTMX 2.0.4 | BSD-2-Clause | Interactions partielles (fichier auto-hébergé `app/static/vendor/htmx.min.js`) |
 | hatchling | MIT | Backend de build (`pyproject.toml`) |
 | pytest | MIT | Tests (dev) |
 | pytest-asyncio | Apache-2.0 | Tests async (dev) |

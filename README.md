@@ -28,9 +28,26 @@ alembic upgrade head
 curl -sf localhost:8000/health
 ```
 
-`/health` doit répondre `200` avec `{"status":"ok","database":"ok"}`. L'accueil est sur `http://localhost:8000/`.
+`/health` doit répondre `200` avec `{"status":"ok","database":"ok"}`. L'accueil (le fil) est sur `http://localhost:8000/`.
 
-Les identifiants Postgres du `.env.example` et de Compose (`palabre` / `palabre`) sont des valeurs locales, pas des secrets. Si les ports 5432 ou 6379 sont déjà pris : `POSTGRES_PORT=5433 VALKEY_PORT=6380 docker compose up -d`.
+Les identifiants Postgres du `.env.example` et de Compose (`palabre` / `palabre`) sont des valeurs locales, pas des secrets. Si les ports 5432 ou 6379 sont déjà pris : `POSTGRES_PORT=5433 VALKEY_PORT=6380 docker compose up -d`. Avec Postgres sur 5433, les tests locaux : `DATABASE_URL=postgresql+asyncpg://palabre:palabre@localhost:5433/palabre pytest -q`.
+
+## Parcours local (deux comptes)
+
+`DEBUG=true` (valeur par défaut de Compose) : le lien magique n'est pas envoyé par SMTP, il est écrit dans les logs.
+
+```bash
+docker compose up -d
+docker compose exec app alembic upgrade head
+# extraire les deux liens : docker compose logs app | grep '/auth/magic'
+```
+
+1. Compte A : ouvrir le premier lien, remplir l'onboarding (pseudo, pays, stack).
+2. Poser une question avec au moins un tag pays.
+3. Compte B : ouvrir le second lien (autre navigateur ou fenêtre privée), onboarding.
+4. Répondre à la question de A.
+5. Compte A : **Utile** (aucun XP), puis **accepter**.
+6. Compte B : pastille ocre **15 XP**. `http://localhost:8000/coupe` affiche le pays de B.
 
 ## CSS (Tailwind CLI standalone)
 

@@ -4,3 +4,4 @@
 | 2026-10-28 | Cursor | Squelette déployable (FastAPI, Docker, Alembic, CI) | Max |
 | 2026-10-28 | Grok Bot (assistant de planification) | Plan, conventions, calendrier | Max |
 | 2026-10-28 | Google Stitch | Maquettes des écrans (à venir) | |
+| 2026-10-30 | Cursor | Cœur MVP-0 : modèles, registre XP, lien magique, Q&R / Utile / accepter, Coupe v0, tests | |
