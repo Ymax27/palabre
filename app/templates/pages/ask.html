@@ -9,7 +9,18 @@
       <input type="hidden" name="source_message_id" value="{{ source_message_id }}">
     {% endif %}
     <label for="title">Titre</label>
-    <input id="title" name="title" required maxlength="200" value="{{ prefill_title|default('') }}">
+    <input
+      id="title"
+      name="title"
+      required
+      maxlength="200"
+      value="{{ prefill_title|default('') }}"
+      hx-get="/questions/suggestions"
+      hx-trigger="keyup changed delay:400ms, blur"
+      hx-target="#dupes"
+      hx-swap="innerHTML"
+    >
+    <div id="dupes"></div>
     <label for="body">Question (markdown)</label>
     <textarea id="body" name="body" rows="10" required>{{ prefill_body|default('') }}</textarea>
     {% for category, tags in tag_groups.items() %}

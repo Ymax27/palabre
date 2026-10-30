@@ -1,0 +1,8 @@
+{% if suggestions %}
+  <p>{{ t("search_dupes") }}</p>
+  <ul>
+    {% for post in suggestions %}
+      <li><a href="/questions/{{ post.id }}">{{ post.title }}</a></li>
+    {% endfor %}
+  </ul>
+{% endif %}
