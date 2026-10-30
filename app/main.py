@@ -4,10 +4,11 @@ from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
+from starlette.middleware.sessions import SessionMiddleware
 
 from app.core.config import settings
 from app.core.db import engine
-from app.routers import health, home
+from app.routers import auth, health, home
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
 
@@ -20,9 +21,18 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
 
 def create_app() -> FastAPI:
     application = FastAPI(title=settings.app_name, lifespan=lifespan)
+    application.add_middleware(
+        SessionMiddleware,
+        secret_key=settings.secret_key,
+        session_cookie=settings.session_cookie_name,
+        https_only=not settings.debug,
+        same_site="lax",
+        max_age=14 * 24 * 3600,
+    )
     application.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
     application.include_router(health.router)
     application.include_router(home.router)
+    application.include_router(auth.router)
     return application
 
 

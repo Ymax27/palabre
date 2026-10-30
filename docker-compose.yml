@@ -30,7 +30,8 @@ services:
       DATABASE_URL: postgresql+asyncpg://palabre:palabre@postgres:5432/palabre
       VALKEY_URL: redis://valkey:6379/0
       SECRET_KEY: ${SECRET_KEY:-must-be-set-locally}
-      DEBUG: ${DEBUG:-false}
+      DEBUG: ${DEBUG:-true}
+      APP_BASE_URL: ${APP_BASE_URL:-http://localhost:8000}
     depends_on:
       postgres:
         condition: service_healthy
