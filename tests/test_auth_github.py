@@ -69,9 +69,9 @@ async def test_github_callback_simulated(
     client: AsyncClient,
     monkeypatch: Any,
 ) -> None:
-    from app.core import oauth
+    import app.routers.auth as auth_router
 
-    monkeypatch.setattr(oauth, "github_client", lambda: _FakeGitHub())
+    monkeypatch.setattr(auth_router, "github_client", lambda: _FakeGitHub())
     response = await client.get("/auth/github/callback", follow_redirects=True)
     assert response.status_code == 200
     assert "Présente-toi" in response.text or "Pseudo" in response.text
