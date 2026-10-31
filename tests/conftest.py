@@ -1,3 +1,7 @@
+import os
+
+os.environ["DEBUG"] = "true"
+
 from collections.abc import AsyncIterator, Awaitable, Callable
 from datetime import UTC, datetime
 
@@ -15,6 +19,13 @@ from app.models.user import User
 
 MakeUser = Callable[..., Awaitable[User]]
 MakeRoom = Callable[..., Awaitable[Room]]
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _force_debug_mode() -> None:
+    from app.core.config import settings
+
+    settings.debug = True
 
 
 @pytest.fixture(autouse=True)
