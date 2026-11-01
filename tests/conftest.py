@@ -37,7 +37,7 @@ async def clean_db() -> AsyncIterator[None]:
             text(
                 "TRUNCATE TABLE magic_links, reactions, worked_reports, "
                 "xp_ledger, post_tags, posts, challenge_tags, challenges, "
-                "league_members, leagues, captain_picks, "
+                "league_members, leagues, captain_picks, user_badges, "
                 "room_messages, rooms, users RESTART IDENTITY CASCADE"
             )
         )

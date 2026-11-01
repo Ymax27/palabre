@@ -14,6 +14,13 @@
   {% if profile.is_captain %}
     <p><span class="xp-pill" title="{{ t('captain_badge') }}">C</span> {{ t("captain_badge") }}</p>
   {% endif %}
+  {% if profile.badges %}
+    <p>
+      {% for badge in profile.badges %}
+        <span class="pill" title="{{ t('badge_' + badge.slug) }}">{{ t('badge_' + badge.slug) }}</span>
+      {% endfor %}
+    </p>
+  {% endif %}
 
   <h2>{{ t("profile_questions") }}</h2>
   {% if not profile.questions %}

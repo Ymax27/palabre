@@ -1,3 +1,4 @@
+from app.models.badge import UserBadge
 from app.models.base import Base
 from app.models.captain import CaptainPick
 from app.models.challenge import Challenge, ChallengeTag
@@ -23,6 +24,7 @@ from app.models.xp_ledger import XpLedger
 __all__ = [
     "Base",
     "CaptainPick",
+    "UserBadge",
     "Challenge",
     "ChallengeTag",
     "League",

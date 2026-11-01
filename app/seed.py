@@ -12,6 +12,7 @@ from app.core.db import SessionLocal, engine
 from app.models.captain import CaptainPick
 from app.models.tag import Tag
 from app.models.user import User
+from app.services.badges import award_badges
 from app.services.challenges import create_challenge
 from app.services.qa import add_answer, create_question
 from app.services.recipes import create_recipe, report_worked
@@ -250,6 +251,7 @@ async def seed(session: AsyncSession) -> bool:
             )
         )
     await session.commit()
+    await award_badges(session)
     return True
 
 

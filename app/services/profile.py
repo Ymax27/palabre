@@ -5,9 +5,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.core.countries import AFRICAN_COUNTRIES
+from app.models.badge import UserBadge
 from app.models.enums import PostType
 from app.models.post import Post
 from app.models.user import User
+from app.services.badges import list_user_badges
 from app.services.captains import is_current_captain
 from app.services.streaks import current_streak
 from app.services.xp import reputation_level, total_xp
@@ -28,6 +30,7 @@ class PublicProfile:
     recipes: list[Post]
     is_captain: bool
     streak: int
+    badges: list[UserBadge]
 
 
 async def get_public_profile(
@@ -62,4 +65,5 @@ async def get_public_profile(
         recipes=recipes,
         is_captain=await is_current_captain(session, user),
         streak=await current_streak(session, user),
+        badges=await list_user_badges(session, user),
     )
