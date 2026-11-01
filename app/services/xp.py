@@ -18,6 +18,23 @@ AWARDS: dict[XpReason, int] = {
     XpReason.RECIPE_PUBLISHED: 10,
     XpReason.RECIPE_VALIDATED_AUTHOR: 20,
     XpReason.RECIPE_VALIDATED_VALIDATOR: 3,
+    XpReason.CHALLENGE_GOLD: 30,
+    XpReason.CHALLENGE_SILVER: 20,
+    XpReason.CHALLENGE_BRONZE: 10,
+}
+
+PEER_REASONS: frozenset[str] = frozenset(
+    {
+        XpReason.ANSWER_ACCEPTED,
+        XpReason.RECIPE_VALIDATED_AUTHOR,
+        XpReason.RECIPE_VALIDATED_VALIDATOR,
+    }
+)
+
+_PODIUM: dict[int, XpReason] = {
+    1: XpReason.CHALLENGE_GOLD,
+    2: XpReason.CHALLENGE_SILVER,
+    3: XpReason.CHALLENGE_BRONZE,
 }
 
 DAILY_CAP = 100
@@ -176,3 +193,24 @@ async def grant_recipe_validated(
         actor=author,
     )
     return (author_delta, validator_delta)
+
+
+async def grant_challenge_podium(
+    session: AsyncSession,
+    *,
+    user: User,
+    place: int,
+    source_post: Post | None,
+    actor: User,
+) -> int:
+    reason = _PODIUM.get(place)
+    if reason is None:
+        return 0
+    return await grant_xp(
+        session,
+        user=user,
+        delta=AWARDS[reason],
+        reason=reason,
+        source_post=source_post,
+        actor=actor,
+    )

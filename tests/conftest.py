@@ -36,8 +36,8 @@ async def clean_db() -> AsyncIterator[None]:
         await session.execute(
             text(
                 "TRUNCATE TABLE magic_links, reactions, worked_reports, "
-                "xp_ledger, post_tags, posts, room_messages, rooms, users "
-                "RESTART IDENTITY CASCADE"
+                "xp_ledger, post_tags, posts, challenge_tags, challenges, "
+                "room_messages, rooms, users RESTART IDENTITY CASCADE"
             )
         )
         await session.commit()

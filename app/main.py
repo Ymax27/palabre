@@ -13,6 +13,7 @@ from app.core.db import engine
 from app.core.limiter import limiter, rate_limit_exceeded_handler
 from app.routers import (
     auth,
+    challenges,
     coupe,
     health,
     home,
@@ -57,6 +58,7 @@ def create_app() -> FastAPI:
     application.include_router(recipes.router)
     application.include_router(profile.router)
     application.include_router(coupe.router)
+    application.include_router(challenges.router)
     application.include_router(rooms.router)
     return application
 

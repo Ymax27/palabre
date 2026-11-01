@@ -8,6 +8,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.models.base import Base
 
 if TYPE_CHECKING:
+    from app.models.challenge import Challenge
     from app.models.reaction import Reaction
     from app.models.room_message import RoomMessage
     from app.models.tag import Tag
@@ -39,6 +40,10 @@ class Post(Base):
     )
     source_message_id: Mapped[int | None] = mapped_column(
         ForeignKey("room_messages.id", ondelete="SET NULL"),
+    )
+    challenge_id: Mapped[int | None] = mapped_column(
+        ForeignKey("challenges.id", ondelete="SET NULL"),
+        index=True,
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -83,3 +88,4 @@ class Post(Base):
         foreign_keys=[source_message_id],
         post_update=True,
     )
+    challenge: Mapped["Challenge | None"] = relationship(back_populates="posts")

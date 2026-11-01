@@ -29,6 +29,9 @@ class XpReason(StrEnum):
     RECIPE_PUBLISHED = "recipe_published"
     RECIPE_VALIDATED_AUTHOR = "recipe_validated_author"
     RECIPE_VALIDATED_VALIDATOR = "recipe_validated_validator"
+    CHALLENGE_GOLD = "challenge_gold"
+    CHALLENGE_SILVER = "challenge_silver"
+    CHALLENGE_BRONZE = "challenge_bronze"
 
 
 class RoomKind(StrEnum):

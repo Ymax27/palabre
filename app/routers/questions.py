@@ -8,6 +8,7 @@ from app.core.limiter import limiter
 from app.core.security import require_csrf
 from app.core.templates import templates, view_context
 from app.models.post import Post
+from app.services.challenges import featured_challenge
 from app.services.qa import (
     QaError,
     accept_answer,
@@ -37,10 +38,18 @@ async def ask_form(
     user: OnboardedUser,
 ) -> HTMLResponse:
     groups = await tags_grouped(session)
+    challenge = await featured_challenge(session)
     return templates.TemplateResponse(
         request,
         "pages/ask.html",
-        await view_context(request, session, user, tag_groups=groups, error=None),
+        await view_context(
+            request,
+            session,
+            user,
+            tag_groups=groups,
+            error=None,
+            challenge=challenge,
+        ),
     )
 
 
@@ -66,6 +75,8 @@ async def ask_submit(
         if source_message_id and source_message_id.isdigit()
         else None
     )
+    join = form.get("join_challenge")
+    challenge_id = int(join) if isinstance(join, str) and join.isdigit() else None
     try:
         question = await create_question_post(
             session,
@@ -74,6 +85,7 @@ async def ask_submit(
             body=body,
             tag_ids=tag_ids,
             source_message_id=source_id,
+            challenge_id=challenge_id,
         )
     except QaError as exc:
         groups = await tags_grouped(session)
@@ -90,6 +102,7 @@ async def ask_submit(
                 user,
                 tag_groups=groups,
                 error=message,
+                challenge=await featured_challenge(session),
                 prefill_title=title,
                 prefill_body=body,
                 source_message_id=source_id,

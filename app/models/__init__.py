@@ -1,4 +1,5 @@
 from app.models.base import Base
+from app.models.challenge import Challenge, ChallengeTag
 from app.models.enums import (
     PostStatus,
     PostType,
@@ -19,6 +20,8 @@ from app.models.xp_ledger import XpLedger
 
 __all__ = [
     "Base",
+    "Challenge",
+    "ChallengeTag",
     "MagicLink",
     "Post",
     "PostStatus",

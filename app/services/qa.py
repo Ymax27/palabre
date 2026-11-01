@@ -8,6 +8,7 @@ from app.models.reaction import Reaction
 from app.models.room_message import RoomMessage
 from app.models.tag import Tag
 from app.models.user import User
+from app.services.challenges import attach_challenge
 from app.services.rooms import link_converted_post
 from app.services.xp import grant_answer_accepted
 
@@ -56,6 +57,7 @@ async def create_question(
     body: str,
     tag_ids: list[int],
     source_message_id: int | None = None,
+    challenge_id: int | None = None,
 ) -> Post:
     title_clean = title.strip()
     body_clean = body.strip()
@@ -80,6 +82,7 @@ async def create_question(
         message_id=source_message_id,
         post=post,
     )
+    await attach_challenge(session, post, challenge_id)
     await session.commit()
     await session.refresh(post)
     return post

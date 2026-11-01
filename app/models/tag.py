@@ -6,6 +6,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.models.base import Base
 
 if TYPE_CHECKING:
+    from app.models.challenge import Challenge
     from app.models.post import Post
 
 
@@ -22,6 +23,10 @@ class Tag(Base):
 
     posts: Mapped[list["Post"]] = relationship(
         secondary="post_tags",
+        back_populates="tags",
+    )
+    challenges: Mapped[list["Challenge"]] = relationship(
+        secondary="challenge_tags",
         back_populates="tags",
     )
 

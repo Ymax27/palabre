@@ -34,11 +34,38 @@ services:
       APP_BASE_URL: ${APP_BASE_URL:-http://localhost:8000}
       GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-}
       GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}
+      SMTP_HOST: ${SMTP_HOST:-mailpit}
+      SMTP_PORT: ${SMTP_PORT:-1025}
     depends_on:
       postgres:
         condition: service_healthy
       valkey:
         condition: service_started
+
+  worker:
+    build:
+      context: .
+      network: host
+    command: ["arq", "app.jobs.worker.WorkerSettings"]
+    environment:
+      DATABASE_URL: postgresql+asyncpg://palabre:palabre@postgres:5432/palabre
+      VALKEY_URL: redis://valkey:6379/0
+      SECRET_KEY: ${SECRET_KEY:-must-be-set-locally}
+      DEBUG: ${DEBUG:-true}
+      APP_BASE_URL: ${APP_BASE_URL:-http://localhost:8000}
+      SMTP_HOST: ${SMTP_HOST:-mailpit}
+      SMTP_PORT: ${SMTP_PORT:-1025}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      valkey:
+        condition: service_started
+
+  mailpit:
+    image: axllent/mailpit
+    ports:
+      - "8025:8025"
+      - "1025:1025"
 
 volumes:
   postgres_data:

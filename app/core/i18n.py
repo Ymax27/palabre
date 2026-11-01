@@ -1,6 +1,22 @@
 STRINGS: dict[str, str] = {
     "nav_home": "Accueil",
     "nav_coupe": "Coupe",
+    "nav_challenge": "Défi",
+    "challenge_empty": "Pas encore de défi cette semaine.",
+    "challenge_window": "Du",
+    "challenge_posts": "Participations",
+    "challenge_posts_empty": (
+        "Personne n'a encore participé. Sois le premier sous l'arbre."
+    ),
+    "challenge_rank": "Classement du défi",
+    "challenge_rank_empty": "Les points apparaissent après une validation par un pair.",
+    "challenge_join": "Participer au défi",
+    "challenge_admin": "Nouveau défi",
+    "challenge_desc": "Description (markdown)",
+    "challenge_start": "Début (UTC)",
+    "challenge_end": "Fin (UTC)",
+    "challenge_create": "Publier le défi",
+    "challenge_invalid": "Défi incomplet ou dates invalides.",
     "nav_ask": "Poser",
     "nav_rooms": "Salons",
     "nav_search": "Rechercher",

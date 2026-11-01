@@ -11,8 +11,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.db import SessionLocal, engine
 from app.models.tag import Tag
 from app.models.user import User
+from app.services.challenges import create_challenge
 from app.services.qa import add_answer, create_question
 from app.services.recipes import create_recipe, report_worked
+from app.services.system import get_system_user
 
 SENTINEL_EMAIL = "askia@demo.palabre.local"
 
@@ -156,6 +158,7 @@ async def seed(session: AsyncSession) -> bool:
             country=country,
             stack=stack,
             created_at=_OLD,
+            is_admin=handle == "askia",
         )
         session.add(user)
         users[handle] = user
@@ -203,6 +206,23 @@ async def seed(session: AsyncSession) -> bool:
             country=country,
             environment=environment,
         )
+
+    await get_system_user(session)
+    wave = await _tag(session, "wave")
+    sn = await _tag(session, "sn")
+    challenge = await create_challenge(
+        session,
+        title="Timeout Wave : une recette qui tient",
+        description=(
+            "Partage une recette ou une question contextualisée "
+            "(pays + paiement) sur un timeout ou un webhook mobile money."
+        ),
+        starts_at=datetime(2026, 11, 2, tzinfo=UTC),
+        ends_at=datetime(2026, 11, 8, 23, 59, 59, tzinfo=UTC),
+        tag_ids=[wave.id, sn.id],
+    )
+    recipes[0].challenge_id = challenge.id
+    await session.commit()
     return True
 
 

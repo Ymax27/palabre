@@ -48,3 +48,12 @@ async def require_onboarded(user: LoginUser) -> User:
 
 
 OnboardedUser = Annotated[User, Depends(require_onboarded)]
+
+
+async def require_admin(user: OnboardedUser) -> User:
+    if not user.is_admin:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+    return user
+
+
+AdminUser = Annotated[User, Depends(require_admin)]

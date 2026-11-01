@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}{{ t("nav_challenge") }} · Palabre{% endblock %}
+{% block content %}
+  <h1>{{ t("nav_challenge") }}</h1>
+  {% if not challenge %}
+    <p>{{ t("challenge_empty") }}</p>
+  {% else %}
+    <article class="card">
+      <h2>{{ challenge.title }}</h2>
+      <p>{{ challenge.description | md }}</p>
+      <p>
+        {% for tag in challenge.tags %}
+          <span class="pill">{{ tag.label }}</span>
+        {% endfor %}
+      </p>
+      <p>{{ t("challenge_window") }} {{ challenge.starts_at.strftime("%d/%m") }} – {{ challenge.ends_at.strftime("%d/%m") }} UTC</p>
+    </article>
+    <h2>{{ t("challenge_posts") }}</h2>
+    {% if not posts %}
+      <p>{{ t("challenge_posts_empty") }}</p>
+    {% endif %}
+    {% for post in posts %}
+      <article>
+        <h3>
+          {% if post.type == "recette" %}
+            <a href="/recettes/{{ post.id }}">{{ post.title }}</a>
+          {% else %}
+            <a href="/questions/{{ post.id }}">{{ post.title }}</a>
+          {% endif %}
+        </h3>
+        <p>{% set author = post.author %}{% include "partials/author.html" %}</p>
+      </article>
+    {% endfor %}
+    <h2>{{ t("challenge_rank") }}</h2>
+    {% if not standings %}
+      <p>{{ t("challenge_rank_empty") }}</p>
+    {% else %}
+      <ol>
+        {% for row in standings %}
+          <li>
+            {% if row.user.handle %}
+              <a href="/u/{{ row.user.handle }}">{{ row.user.handle }}</a>
+            {% endif %}
+            · {{ row.xp }} XP
+          </li>
+        {% endfor %}
+      </ol>
+    {% endif %}
+  {% endif %}
+{% endblock %}

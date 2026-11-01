@@ -26,8 +26,9 @@ dependencies = [
     "markdown-it-py",
     "nh3",
     "authlib",
-    "redis",
+    "redis>=4,<6",
     "slowapi",
+    "arq",
 ]
 
 [project.optional-dependencies]

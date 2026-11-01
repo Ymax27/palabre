@@ -1,0 +1,6 @@
+{% if challenge %}
+  <label>
+    <input type="checkbox" name="join_challenge" value="{{ challenge.id }}" checked>
+    {{ t("challenge_join") }} — {{ challenge.title }}
+  </label>
+{% endif %}
