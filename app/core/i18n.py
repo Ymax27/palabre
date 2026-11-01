@@ -1,6 +1,7 @@
 STRINGS: dict[str, str] = {
     "nav_home": "Accueil",
     "nav_coupe": "Coupe",
+    "captain_badge": "Capitaine",
     "nav_challenge": "Défi",
     "nav_leagues": "Ligues",
     "league_name": "Nom de la ligue",

@@ -9,12 +9,14 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import SessionLocal, engine
+from app.models.captain import CaptainPick
 from app.models.tag import Tag
 from app.models.user import User
 from app.services.challenges import create_challenge
 from app.services.qa import add_answer, create_question
 from app.services.recipes import create_recipe, report_worked
 from app.services.system import get_system_user
+from app.services.weeks import week_start
 
 SENTINEL_EMAIL = "askia@demo.palabre.local"
 
@@ -25,6 +27,7 @@ _USERS: tuple[tuple[str, str, str, str, str], ...] = (
     ("bakary@demo.palabre.local", "bakary", "CI", "JavaScript", "MTN MoMo en 2G"),
     ("amina@demo.palabre.local", "amina", "KE", "Flutter", "M-Pesa hors réseau"),
     ("yaw@demo.palabre.local", "yaw", "GH", "Django", "MoMo Ghana timeout"),
+    ("esther@demo.palabre.local", "esther", "CM", "Python", "Orange Money Yaoundé"),
 )
 
 _QUESTIONS: tuple[tuple[str, str, str, tuple[str, ...]], ...] = (
@@ -126,6 +129,12 @@ _RECIPES: tuple[tuple[str, str, str, tuple[str, ...]], ...] = (
         "3. Ignorer le second POST silencieusement.",
         ("sn", "orange-money", "4g", "fastapi"),
     ),
+    (
+        "esther",
+        "Orange Money à Yaoundé malgré la 3G",
+        "1. Timeout 12 s.\n2. Une seule relance.\n3. Journal du txn_id.",
+        ("cm", "orange-money", "3g", "python"),
+    ),
 )
 
 # (recipe_index, validator_handle, country, environment)
@@ -135,6 +144,7 @@ _VALIDATIONS: tuple[tuple[int, str, str, str], ...] = (
     (2, "yaw", "GH", "Flutter 3.24 · 4G Accra"),
     (3, "askia", "SN", "Django 5 · Orange · 2G Thiès"),
     (4, "amina", "KE", "FastAPI · Orange Money · Fibre"),
+    (5, "bakary", "CI", "Python · Orange Money · 3G Douala"),
 )
 
 
@@ -222,6 +232,23 @@ async def seed(session: AsyncSession) -> bool:
         tag_ids=[wave.id, sn.id],
     )
     recipes[0].challenge_id = challenge.id
+    current_week = week_start()
+    nov2 = datetime(2026, 11, 2, tzinfo=UTC)
+    session.add(
+        CaptainPick(
+            week_start=current_week,
+            country="CM",
+            user_id=users["esther"].id,
+        )
+    )
+    if current_week != nov2:
+        session.add(
+            CaptainPick(
+                week_start=nov2,
+                country="CM",
+                user_id=users["esther"].id,
+            )
+        )
     await session.commit()
     return True
 
@@ -231,7 +258,7 @@ async def main() -> None:
         created = await seed(session)
     await engine.dispose()
     if created:
-        print("Seed OK : 4 comptes, 10 questions, 5 recettes, validations inter-pays.")
+        print("Seed OK : comptes démo, défis, capitaine CM, validations inter-pays.")
     else:
         print("Seed ignoré : les comptes de démo existent déjà.")
 

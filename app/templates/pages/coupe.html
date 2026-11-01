@@ -11,6 +11,7 @@
           <th>Rang</th>
           <th>Pays</th>
           <th>Score</th>
+          <th>{{ t("captain_badge") }}</th>
         </tr>
       </thead>
       <tbody>
@@ -19,6 +20,12 @@
             <td>{{ row.rank }}</td>
             <td>{{ row.label }}</td>
             <td>{{ "%.1f"|format(row.score) }}</td>
+            <td>
+              {% if row.captain_handle %}
+                <span class="xp-pill">C</span>
+                <a href="/u/{{ row.captain_handle }}">{{ row.captain_handle }}</a>
+              {% endif %}
+            </td>
           </tr>
         {% endfor %}
       </tbody>

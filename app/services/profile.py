@@ -8,6 +8,7 @@ from app.core.countries import AFRICAN_COUNTRIES
 from app.models.enums import PostType
 from app.models.post import Post
 from app.models.user import User
+from app.services.captains import is_current_captain
 from app.services.xp import reputation_level, total_xp
 
 _COUNTRY_LABELS = dict(AFRICAN_COUNTRIES)
@@ -24,6 +25,7 @@ class PublicProfile:
     questions: list[Post]
     answers: list[Post]
     recipes: list[Post]
+    is_captain: bool
 
 
 async def get_public_profile(
@@ -56,4 +58,5 @@ async def get_public_profile(
         questions=questions,
         answers=answers,
         recipes=recipes,
+        is_captain=await is_current_captain(session, user),
     )
