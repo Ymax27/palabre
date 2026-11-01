@@ -22,7 +22,11 @@ Licences des dépendances directes. Interdites : GPL, AGPL, LGPL. Le scan CI (`p
 | markdown-it-py | MIT | Rendu Markdown utilisateur |
 | mdurl | MIT | Transitive directe de `markdown-it-py` |
 | nh3 | MIT | Assainissement HTML après le rendu Markdown |
-| redis (client Python) | MIT | Pub/sub Valkey pour les salons SSE |
+| redis (client Python) | MIT | Pub/sub Valkey pour les salons SSE ; client d'arq (`>=4,<6`) |
+| arq | MIT | Jobs cron (podium, capitaines, badges) et emails hors requête |
+| hiredis | MIT | Transitive optionnelle du client redis 5 |
+| PyJWT | MIT | Transitive installée avec la pile auth / arq |
+| Mailpit | MIT | SMTP local de démo (service Compose, pas une dépendance Python) |
 | slowapi | MIT | Plafonds HTTP messages / recherche / publications |
 | limits | MIT | Transitive directe de slowapi |
 | Deprecated | MIT | Transitive de `limits` |
