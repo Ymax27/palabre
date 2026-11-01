@@ -37,6 +37,16 @@
       header nav { display: flex; gap: var(--s-4); flex: 1; }
       header form { margin: 0; }
       main { max-width: 44rem; margin: 0 auto; padding: var(--s-6) var(--s-4); }
+      .form-dots { white-space: nowrap; }
+      .form-dot {
+        display: inline-block;
+        width: 0.65rem;
+        height: 0.65rem;
+        border-radius: 50%;
+        background: var(--sand-300);
+        margin-right: 2px;
+      }
+      .form-dot.is-on { background: var(--ochre-400); }
       .xp-pill {
         background: var(--ochre-400);
         color: var(--ink-900);

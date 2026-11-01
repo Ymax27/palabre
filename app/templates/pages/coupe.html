@@ -11,6 +11,7 @@
           <th>Rang</th>
           <th>Pays</th>
           <th>Score</th>
+          <th>{{ t("coupe_form") }}</th>
           <th>{{ t("captain_badge") }}</th>
         </tr>
       </thead>
@@ -20,6 +21,14 @@
             <td>{{ row.rank }}</td>
             <td>{{ row.label }}</td>
             <td>{{ "%.1f"|format(row.score) }}</td>
+            <td class="form-dots" aria-label="{{ t('coupe_form') }}">
+              {% for point in row.form %}
+                <span
+                  class="form-dot{% if point > 0 %} is-on{% endif %}"
+                  title="{{ '%.1f'|format(point) }}"
+                ></span>
+              {% endfor %}
+            </td>
             <td>
               {% if row.captain_handle %}
                 <span class="xp-pill">C</span>

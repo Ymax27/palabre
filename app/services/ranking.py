@@ -1,16 +1,18 @@
 from dataclasses import dataclass, field
-from datetime import timedelta
+from datetime import datetime, timedelta
 
-from sqlalchemy import Subquery, func, select
+from sqlalchemy import ColumnElement, Subquery, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.countries import AFRICAN_COUNTRIES
 from app.models.captain import CaptainPick
 from app.models.user import User
 from app.models.xp_ledger import XpLedger
+from app.services.weeks import week_start
 from app.services.xp import PEER_REASONS
 
 _LABELS = dict(AFRICAN_COUNTRIES)
+_FORM_WEEKS = 5
 
 
 @dataclass(frozen=True)
@@ -23,7 +25,18 @@ class CountryScore:
     form: list[float] = field(default_factory=list)
 
 
-def _user_coupe_xp() -> Subquery:
+def _user_coupe_xp(
+    start: datetime | None = None,
+    end: datetime | None = None,
+) -> Subquery:
+    bonus_filters: list[ColumnElement[bool]] = [XpLedger.reason.in_(PEER_REASONS)]
+    total_filters: list[ColumnElement[bool]] = [User.country.is_not(None)]
+    if start is not None:
+        bonus_filters.append(XpLedger.created_at >= start)
+        total_filters.append(XpLedger.created_at >= start)
+    if end is not None:
+        bonus_filters.append(XpLedger.created_at < end)
+        total_filters.append(XpLedger.created_at < end)
     bonus = (
         select(
             XpLedger.user_id.label("user_id"),
@@ -37,11 +50,11 @@ def _user_coupe_xp() -> Subquery:
             & (XpLedger.created_at >= CaptainPick.week_start)
             & (XpLedger.created_at < CaptainPick.week_start + timedelta(days=7)),
         )
-        .where(XpLedger.reason.in_(PEER_REASONS))
+        .where(*bonus_filters)
         .group_by(XpLedger.user_id)
         .subquery()
     )
-    totals = (
+    return (
         select(
             User.country.label("country"),
             User.id.label("user_id"),
@@ -49,16 +62,19 @@ def _user_coupe_xp() -> Subquery:
         )
         .join(XpLedger, XpLedger.user_id == User.id)
         .outerjoin(bonus, bonus.c.user_id == User.id)
-        .where(User.country.is_not(None))
+        .where(*total_filters)
         .group_by(User.country, User.id, bonus.c.bonus)
         .having(func.sum(XpLedger.delta) > 0)
         .subquery()
     )
-    return totals
 
 
-async def coupe_standings(session: AsyncSession) -> list[CountryScore]:
-    totals = _user_coupe_xp()
+async def _country_scores(
+    session: AsyncSession,
+    start: datetime | None = None,
+    end: datetime | None = None,
+) -> dict[str, float]:
+    totals = _user_coupe_xp(start, end)
     ranked = (
         select(
             totals.c.country,
@@ -75,11 +91,21 @@ async def coupe_standings(session: AsyncSession) -> list[CountryScore]:
         )
         .where(ranked.c.rn <= 10)
         .group_by(ranked.c.country)
-        .order_by(func.avg(ranked.c.xp).desc())
     )
     rows = (await session.execute(stmt)).all()
-    from app.services.weeks import week_start
+    return {str(row.country): float(row.score) for row in rows}
 
+
+def _form_windows(now: datetime | None = None) -> list[tuple[datetime, datetime]]:
+    current = week_start(now)
+    offsets = range(_FORM_WEEKS - 1, -1, -1)
+    starts = [current - timedelta(days=7 * offset) for offset in offsets]
+    return [(start, start + timedelta(days=7)) for start in starts]
+
+
+async def coupe_standings(session: AsyncSession) -> list[CountryScore]:
+    scores = await _country_scores(session)
+    ordered = sorted(scores.items(), key=lambda item: item[1], reverse=True)
     start = week_start()
     picks = {
         pick.country: pick
@@ -98,18 +124,23 @@ async def coupe_standings(session: AsyncSession) -> list[CountryScore]:
         ).all()
         handles = {user.id: user.handle or "" for user in users}
 
+    weekly: list[dict[str, float]] = []
+    for window_start, window_end in _form_windows():
+        weekly.append(await _country_scores(session, window_start, window_end))
+
     standings: list[CountryScore] = []
-    for index, row in enumerate(rows, start=1):
-        code = str(row.country)
+    for index, (code, score) in enumerate(ordered, start=1):
         pick = picks.get(code)
         handle = handles.get(pick.user_id) if pick else None
+        form = [week.get(code, 0.0) for week in weekly]
         standings.append(
             CountryScore(
                 rank=index,
                 country=code,
                 label=_LABELS.get(code, code),
-                score=float(row.score),
+                score=score,
                 captain_handle=handle or None,
+                form=form,
             )
         )
     return standings
