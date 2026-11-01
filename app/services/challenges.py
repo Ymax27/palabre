@@ -10,6 +10,7 @@ from app.models.post import Post
 from app.models.tag import Tag
 from app.models.user import User
 from app.models.xp_ledger import XpLedger
+from app.services.notify import notify_challenge_open
 from app.services.system import get_system_user
 from app.services.xp import PEER_REASONS, grant_challenge_podium
 
@@ -117,6 +118,7 @@ async def create_challenge(
     session.add(challenge)
     await session.commit()
     await session.refresh(challenge)
+    await notify_challenge_open(session, challenge_id=challenge.id)
     return challenge
 
 

@@ -9,6 +9,7 @@ from app.models.room_message import RoomMessage
 from app.models.tag import Tag
 from app.models.user import User
 from app.services.challenges import attach_challenge
+from app.services.notify import notify_accepted, notify_answer
 from app.services.rooms import link_converted_post
 from app.services.xp import grant_answer_accepted
 
@@ -122,6 +123,10 @@ async def add_answer(
     session.add(answer)
     await session.commit()
     await session.refresh(answer)
+    if question.author_id != author.id:
+        target = await session.get(User, question.author_id)
+        if target is not None:
+            await notify_answer(session, author=target, question_id=question.id)
     return answer
 
 
@@ -185,4 +190,8 @@ async def accept_answer(
         question_author=user,
     )
     await session.commit()
+    if awarded > 0:
+        reply = await session.get(User, answer.author_id)
+        if reply is not None:
+            await notify_accepted(session, author=reply, question_id=question.id)
     return awarded

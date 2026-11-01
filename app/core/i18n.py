@@ -101,6 +101,20 @@ STRINGS: dict[str, str] = {
     "profile_answers": "Réponses",
     "profile_recipes": "Recettes",
     "profile_none": "Pas encore de contribution ici.",
+    "nav_notifications": "Cloche",
+    "notif_empty": "Rien pour l'instant.",
+    "notif_prefs": "Préférences de notification",
+    "notif_pref_in_app": "Dans l'application",
+    "notif_pref_email": "Par email",
+    "notif_save": "Enregistrer",
+    "notif_answer": "Quelqu'un a répondu à ta question.",
+    "notif_accepted": "Ta réponse a été acceptée.",
+    "notif_worked": "Quelqu'un a confirmé que ta recette a marché.",
+    "notif_challenge": "Un nouveau défi est ouvert.",
+    "notif_league_join": "Un membre a rejoint ta ligue.",
+    "notif_unsub": "Se désinscrire des emails",
+    "notif_unsub_ok": "Tu ne recevras plus les emails Palabre.",
+    "notif_unsub_bad": "Lien de désinscription invalide.",
 }
 
 

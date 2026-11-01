@@ -1,0 +1,12 @@
+<div class="card">
+  {% if not notifications %}
+    <p>{{ t("notif_empty") }}</p>
+  {% else %}
+    <ul>
+      {% for item in notifications %}
+        <li><a href="{{ item.url }}">{{ item.title }}</a></li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+  <p><a href="/notifications/preferences">{{ t("notif_prefs") }}</a></p>
+</div>

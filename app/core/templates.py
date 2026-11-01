@@ -10,6 +10,7 @@ from app.core.i18n import t
 from app.core.security import csrf_token
 from app.models.user import User
 from app.services.markdown import render_markdown
+from app.services.notify import unread_count
 from app.services.streaks import current_streak
 from app.services.xp import total_xp
 
@@ -33,10 +34,12 @@ async def view_context(
 ) -> dict[str, Any]:
     xp = await total_xp(session, user) if user is not None else 0
     streak = await current_streak(session, user) if user is not None else 0
+    unread = await unread_count(session, user) if user is not None else 0
     ctx: dict[str, Any] = {
         "user": user,
         "xp": xp,
         "streak": streak,
+        "unread": unread,
         "csrf": csrf_token(request),
         "t": t,
     }

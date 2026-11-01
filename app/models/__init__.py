@@ -12,6 +12,7 @@ from app.models.enums import (
 )
 from app.models.league import League, LeagueMember
 from app.models.magic_link import MagicLink
+from app.models.notification import Notification, NotificationPref
 from app.models.post import Post
 from app.models.reaction import Reaction
 from app.models.room import Room
@@ -30,6 +31,8 @@ __all__ = [
     "League",
     "LeagueMember",
     "MagicLink",
+    "Notification",
+    "NotificationPref",
     "Post",
     "PostStatus",
     "PostTag",

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}{{ t("notif_prefs") }} · Palabre{% endblock %}
+{% block content %}
+  <h1>{{ t("notif_prefs") }}</h1>
+  <form method="post" action="/notifications/preferences">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <label>
+      <input type="checkbox" name="in_app"{% if prefs.in_app %} checked{% endif %}>
+      {{ t("notif_pref_in_app") }}
+    </label>
+    <label>
+      <input type="checkbox" name="email"{% if prefs.email %} checked{% endif %}>
+      {{ t("notif_pref_email") }}
+    </label>
+    <button type="submit">{{ t("notif_save") }}</button>
+  </form>
+{% endblock %}

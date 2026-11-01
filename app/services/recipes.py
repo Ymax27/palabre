@@ -13,6 +13,7 @@ from app.models.tag import Tag
 from app.models.user import User
 from app.models.worked_report import WorkedReport
 from app.services.challenges import attach_challenge
+from app.services.notify import notify_worked
 from app.services.rooms import link_converted_post
 from app.services.xp import VALIDATOR_MIN_AGE_DAYS, grant_recipe_validated
 
@@ -154,4 +155,5 @@ async def report_worked(
     )
     await session.commit()
     await session.refresh(report)
+    await notify_worked(session, author=author, recipe_id=recipe.id)
     return report

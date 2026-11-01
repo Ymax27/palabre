@@ -9,6 +9,7 @@ from sqlalchemy.orm import selectinload
 from app.models.league import League, LeagueMember
 from app.models.user import User
 from app.models.xp_ledger import XpLedger
+from app.services.notify import notify_league_join
 
 SEASON_START = datetime(2026, 11, 2, tzinfo=UTC)
 SEASON_END = datetime(2026, 11, 22, 23, 59, 59, tzinfo=UTC)
@@ -75,6 +76,14 @@ async def join_league(session: AsyncSession, *, user: User, code: str) -> League
     if existing is None:
         session.add(LeagueMember(league_id=league.id, user_id=user.id))
         await session.commit()
+        if league.owner_id != user.id:
+            owner = league.owner or await session.get(User, league.owner_id)
+            if owner is not None:
+                await notify_league_join(
+                    session,
+                    owner=owner,
+                    code=league.invite_code,
+                )
     return league
 
 

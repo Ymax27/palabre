@@ -29,6 +29,14 @@ def _force_debug_mode() -> None:
 
 
 @pytest.fixture(autouse=True)
+def _mute_notify_email(monkeypatch: pytest.MonkeyPatch) -> None:
+    async def _noop(*_args: object, **_kwargs: object) -> None:
+        return None
+
+    monkeypatch.setattr("app.services.notify.enqueue_email", _noop)
+
+
+@pytest.fixture(autouse=True)
 async def clean_db() -> AsyncIterator[None]:
     reset_rate_limit()
     limiter.reset()
@@ -38,6 +46,7 @@ async def clean_db() -> AsyncIterator[None]:
                 "TRUNCATE TABLE magic_links, reactions, worked_reports, "
                 "xp_ledger, post_tags, posts, challenge_tags, challenges, "
                 "league_members, leagues, captain_picks, user_badges, "
+                "notifications, notification_prefs, "
                 "room_messages, rooms, users RESTART IDENTITY CASCADE"
             )
         )

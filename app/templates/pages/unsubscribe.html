@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}{{ t("notif_unsub") }} · Palabre{% endblock %}
+{% block content %}
+  <h1>{{ t("notif_unsub") }}</h1>
+  {% if ok %}
+    <p>{{ t("notif_unsub_ok") }}</p>
+  {% else %}
+    <p>{{ t("notif_unsub_bad") }}</p>
+  {% endif %}
+{% endblock %}

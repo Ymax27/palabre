@@ -210,6 +210,21 @@
           <a href="/recettes/nouvelle">{{ t("recipe_new") }}</a>
         {% endif %}
       </nav>
+      {% if user is defined and user %}
+        <a
+          href="/notifications/preferences"
+          hx-get="/notifications"
+          hx-target="#notif-drawer"
+          hx-swap="innerHTML"
+          aria-label="{{ t('nav_notifications') }}"
+        >
+          {{ t("nav_notifications") }}
+          {% if unread is defined and unread > 0 %}
+            <span class="pill">{{ unread }}</span>
+          {% endif %}
+        </a>
+        <div id="notif-drawer"></div>
+      {% endif %}
       {% if user is defined and user and xp is defined and xp > 0 %}
         <span class="xp-pill" id="xp-pill">
           {{ xp }} XP
