@@ -8,6 +8,7 @@ from app.models.enums import (
     TagCategory,
     XpReason,
 )
+from app.models.league import League, LeagueMember
 from app.models.magic_link import MagicLink
 from app.models.post import Post
 from app.models.reaction import Reaction
@@ -22,6 +23,8 @@ __all__ = [
     "Base",
     "Challenge",
     "ChallengeTag",
+    "League",
+    "LeagueMember",
     "MagicLink",
     "Post",
     "PostStatus",

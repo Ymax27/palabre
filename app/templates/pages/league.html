@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}{{ league.name }} · Palabre{% endblock %}
+{% block content %}
+  <p><a href="/ligues">{{ t("nav_leagues") }}</a></p>
+  <h1>{{ league.name }}</h1>
+  <p>{{ t("league_code") }} : <code>{{ league.invite_code }}</code></p>
+  <ol>
+    {% for row in standings %}
+      <li>
+        {% if row.user.handle %}
+          <a href="/u/{{ row.user.handle }}">{{ row.user.handle }}</a>
+        {% endif %}
+        · {{ row.xp }} XP
+      </li>
+    {% endfor %}
+  </ol>
+{% endblock %}

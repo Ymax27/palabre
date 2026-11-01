@@ -138,7 +138,8 @@
           {"label": {{ t("ask_title")|tojson }}, "href": "/questions/nouvelle"},
           {"label": {{ t("recipe_new")|tojson }}, "href": "/recettes/nouvelle"},
           {"label": {{ t("nav_coupe")|tojson }}, "href": "/coupe"},
-          {"label": {{ t("nav_challenge")|tojson }}, "href": "/defi"}
+          {"label": {{ t("nav_challenge")|tojson }}, "href": "/defi"},
+          {"label": {{ t("nav_leagues")|tojson }}, "href": "/ligues"}
         ]
       })'
       @keydown.window="onKey($event)"
@@ -193,6 +194,7 @@
         <a href="/recettes">{{ t("nav_recipes") }}</a>
         <a href="/coupe">{{ t("nav_coupe") }}</a>
         <a href="/defi">{{ t("nav_challenge") }}</a>
+        <a href="/ligues">{{ t("nav_leagues") }}</a>
         {% if user is defined and user and user.handle %}
           <a href="/questions/nouvelle">{{ t("nav_ask") }}</a>
           <a href="/recettes/nouvelle">{{ t("recipe_new") }}</a>

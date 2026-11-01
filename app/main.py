@@ -17,6 +17,7 @@ from app.routers import (
     coupe,
     health,
     home,
+    leagues,
     profile,
     questions,
     recipes,
@@ -59,6 +60,7 @@ def create_app() -> FastAPI:
     application.include_router(profile.router)
     application.include_router(coupe.router)
     application.include_router(challenges.router)
+    application.include_router(leagues.router)
     application.include_router(rooms.router)
     return application
 

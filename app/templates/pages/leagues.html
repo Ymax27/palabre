@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}{{ t("nav_leagues") }} · Palabre{% endblock %}
+{% block content %}
+  <h1>{{ t("nav_leagues") }}</h1>
+  {% if error %}<p role="alert">{{ error }}</p>{% endif %}
+  <form method="post" action="/ligues">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <label for="name">{{ t("league_name") }}</label>
+    <input id="name" name="name" required maxlength="80">
+    <p><button type="submit">{{ t("league_create") }}</button></p>
+  </form>
+  <form method="post" action="/ligues/rejoindre">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <label for="code">{{ t("league_code") }}</label>
+    <input id="code" name="code" required maxlength="16">
+    <p><button type="submit">{{ t("league_join") }}</button></p>
+  </form>
+  <h2>{{ t("league_mine") }}</h2>
+  {% if not leagues %}
+    <p>{{ t("league_none") }}</p>
+  {% endif %}
+  <ul>
+    {% for league in leagues %}
+      <li><a href="/ligues/{{ league.invite_code }}">{{ league.name }}</a></li>
+    {% endfor %}
+  </ul>
+{% endblock %}
