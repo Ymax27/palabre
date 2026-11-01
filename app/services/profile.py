@@ -9,6 +9,7 @@ from app.models.enums import PostType
 from app.models.post import Post
 from app.models.user import User
 from app.services.captains import is_current_captain
+from app.services.streaks import current_streak
 from app.services.xp import reputation_level, total_xp
 
 _COUNTRY_LABELS = dict(AFRICAN_COUNTRIES)
@@ -26,6 +27,7 @@ class PublicProfile:
     answers: list[Post]
     recipes: list[Post]
     is_captain: bool
+    streak: int
 
 
 async def get_public_profile(
@@ -59,4 +61,5 @@ async def get_public_profile(
         answers=answers,
         recipes=recipes,
         is_captain=await is_current_captain(session, user),
+        streak=await current_streak(session, user),
     )

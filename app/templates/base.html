@@ -201,7 +201,10 @@
         {% endif %}
       </nav>
       {% if user is defined and user and xp is defined and xp > 0 %}
-        <span class="xp-pill" id="xp-pill">{{ xp }} XP</span>
+        <span class="xp-pill" id="xp-pill">
+          {{ xp }} XP
+          {% if streak is defined and streak > 0 %} · {{ streak }} j{% endif %}
+        </span>
       {% endif %}
       {% if user is defined and user %}
         {% if user.handle %}
