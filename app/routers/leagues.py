@@ -105,11 +105,13 @@ async def league_detail(
     session: SessionDep,
     user: CurrentUser,
     code: str,
+    periode: str = "saison",
 ) -> HTMLResponse:
     league = await get_league_by_code(session, code)
     if league is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-    standings = await league_standings(session, league)
+    weekly = periode != "saison"
+    standings = await league_standings(session, league, weekly=weekly)
     return templates.TemplateResponse(
         request,
         "pages/league.html",
@@ -119,5 +121,6 @@ async def league_detail(
             user,
             league=league,
             standings=standings,
+            weekly=weekly,
         ),
     )

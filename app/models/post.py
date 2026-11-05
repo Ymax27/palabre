@@ -30,6 +30,12 @@ class Post(Base):
     )
     title: Mapped[str | None] = mapped_column(String(200))
     body: Mapped[str] = mapped_column(Text)
+    probleme: Mapped[str | None] = mapped_column(Text)
+    solution: Mapped[str | None] = mapped_column(Text)
+    code: Mapped[str | None] = mapped_column(Text)
+    prerequis: Mapped[str | None] = mapped_column(Text)
+    versions: Mapped[str | None] = mapped_column(Text)
+    limites: Mapped[str | None] = mapped_column(Text)
     status: Mapped[str] = mapped_column(
         String(20),
         default="open",
@@ -42,7 +48,7 @@ class Post(Base):
         ForeignKey("room_messages.id", ondelete="SET NULL"),
     )
     challenge_id: Mapped[int | None] = mapped_column(
-        ForeignKey("challenges.id", ondelete="SET NULL"),
+        ForeignKey("defis.id", ondelete="SET NULL"),
         index=True,
     )
     created_at: Mapped[datetime] = mapped_column(

@@ -4,6 +4,11 @@
   <p><a href="/ligues">{{ t("nav_leagues") }}</a></p>
   <h1>{{ league.name }}</h1>
   <p>{{ t("league_code") }} : <code>{{ league.invite_code }}</code></p>
+  <p>
+    <a href="/ligues/{{ league.invite_code }}?periode=semaine">{{ t("league_week") }}</a>
+    ·
+    <a href="/ligues/{{ league.invite_code }}?periode=saison">{{ t("league_season") }}</a>
+  </p>
   <ol>
     {% for row in standings %}
       <li>

@@ -36,4 +36,6 @@ class XpReason(StrEnum):
 
 class RoomKind(StrEnum):
     PAYS = "pays"
-    THEME = "theme"
+    STACK = "stack"
+    LIGUE = "ligue"
+    AIDE = "aide"

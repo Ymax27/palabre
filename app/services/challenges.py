@@ -5,6 +5,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from app.core.i18n import t
 from app.models.challenge import Challenge
 from app.models.post import Post
 from app.models.tag import Tag
@@ -13,6 +14,16 @@ from app.models.xp_ledger import XpLedger
 from app.services.notify import notify_challenge_open
 from app.services.system import get_system_user
 from app.services.xp import PEER_REASONS, grant_challenge_podium
+
+
+def remaining_label(challenge: Challenge, now: datetime | None = None) -> str:
+    stamp = now or datetime.now(UTC)
+    left = challenge.ends_at - stamp
+    if left.total_seconds() <= 0:
+        return t("challenge_remaining").format(days=0, hours=0)
+    days = left.days
+    hours = left.seconds // 3600
+    return t("challenge_remaining").format(days=days, hours=hours)
 
 
 class ChallengeError(Exception):

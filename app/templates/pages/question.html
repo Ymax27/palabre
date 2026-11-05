@@ -36,6 +36,22 @@
         {% set marked = utile_mine[answer.id] %}
         {% set can_vote = answer.author_id != user.id %}
         {% include "partials/utile.html" %}
+        {% if answer.author_id != user.id %}
+          <form method="post" action="/merci/{{ answer.author_id }}">
+            <input type="hidden" name="csrf" value="{{ csrf }}">
+            <input type="hidden" name="url" value="/questions/{{ question.id }}">
+            <button type="submit" class="secondary">{{ t("merci") }}</button>
+          </form>
+        {% endif %}
+        {% if answer.author_id == user.id %}
+          <form method="post" action="/capitaine/{{ answer.id }}">
+            <input type="hidden" name="csrf" value="{{ csrf }}">
+            <button type="submit" class="secondary">{{ t("captain_badge") }}</button>
+          </form>
+        {% endif %}
+      {% endif %}
+      {% if user and user.id == question.author_id and question.accepted_answer_id == answer.id %}
+        <p><a href="/recettes/nouvelle?from_answer={{ answer.id }}">{{ t("recipe_from_answer") }}</a></p>
       {% endif %}
       {% if user and user.id == question.author_id and not question.accepted_answer_id and answer.author_id != user.id %}
         <form method="post" action="/questions/{{ question.id }}/accepter/{{ answer.id }}">

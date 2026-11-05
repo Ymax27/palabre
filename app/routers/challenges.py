@@ -13,6 +13,7 @@ from app.services.challenges import (
     create_challenge,
     featured_challenge,
     list_participations,
+    remaining_label,
 )
 from app.services.qa import tags_grouped
 
@@ -38,6 +39,7 @@ async def challenge_page(
             challenge=challenge,
             posts=posts,
             standings=standings,
+            remaining=remaining_label(challenge) if challenge else "",
         ),
     )
 

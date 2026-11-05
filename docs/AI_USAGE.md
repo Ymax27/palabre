@@ -8,3 +8,5 @@
 | 2026-10-30 | Cursor | Fin MVP-0 : OAuth GitHub, recettes / Ça a marché, profil, seed, handover | |
 | 2026-10-30 | Cursor | Salons SSE, conversion d'aide, recherche FTS, palette Ctrl+K, slowapi | |
 | 2026-11-01 | Cursor | Couche de jeu : défi, ligues, Capitaine ×2, séries, badges, notifs | |
+| 2026-11-01 | Cursor | Conformité PLAN.md : registre, Coupe ZSET, Capitaine désigné, salons, notifs | |
+| 2026-11-05 | Cursor | XP +10 publication, anti-récipro 1/j, réputation 4 niveaux + anneau | |

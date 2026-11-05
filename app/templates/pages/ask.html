@@ -25,7 +25,7 @@
     <textarea id="body" name="body" rows="10" required>{{ prefill_body|default('') }}</textarea>
     {% for category, tags in tag_groups.items() %}
       <fieldset class="tag-group">
-        <legend>{{ category }}{% if category == "pays" %} (au moins un){% endif %}</legend>
+        <legend>{{ category }} ({{ t("tag_required") }})</legend>
         {% for tag in tags %}
           <label>
             <input type="checkbox" name="tag_id" value="{{ tag.id }}">

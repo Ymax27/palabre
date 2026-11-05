@@ -52,13 +52,13 @@ docs/              # AI_USAGE.md, THIRD_PARTY.md, ce fichier
 - Chaque PR met à jour `docs/AI_USAGE.md`.
 - Pas de fonctionnalité hors `PLAN.md`. Petites PR, un sujet.
 
-**Jeu** : Utile n'apporte pas d'XP. Accepter une réponse : +15. « Ça a marché » : +20 auteur / +3 validateur si **autre pays**, validateur ≥ 3 jours (`VALIDATOR_MIN_AGE_DAYS`). Publier une recette ne donne pas de points (pair only).
+**Jeu** (PLAN §0, §2 E, §3) : Utile et chat = 0 XP. Accepter : +15. **Recette publiée : +10** (via `grant_recipe_published`, acteur système, plafond 100/j UTC). « Ça a marché » autre pays : +20 / +3 ; même pays : 0. Validateur &lt; 3 jours : l'action passe, 0 XP. **Anti-réciprocité** : 1 échange XP max entre deux mêmes comptes par jour UTC (hors acteur système ; une validation « Ça a marché » compte pour un échange). **Réputation** : `rep = delta` sur chaque ligne ; niveaux Nouveau 0 / Membre 15 / Pilier 100 / Ancien 500 ; édition dès Membre ; modération dès Pilier ; affichage profil + anneau. Capitaine : ×2 si validée (`multiplicateur`, puis plafond 100/j). Coupe = moyenne top 10, ZSET 5 min, sans bonus Capitaine. Défi : lundi → dimanche 20h GMT. Série + gel, 0 XP. Badge « testé en prod ». Params XP : constantes dans `xp.py` jusqu'au back-office 06–09/11 (voir `docs/adr/0001-xp-params-backoffice.md`).
 
 ## Tâche de départ par rôle
 
 ### R2 · Temps réel et jeu
 
-Premier livrable : salons SSE (`sse-starlette` déjà en dépendance) + job `arq` qui recalcule la Coupe (forme 5 semaines, ZSET Valkey). Lire PLAN.md §2 F/G/I. Ne pas toucher à `xp.py` sans revue R1.
+Premier livrable : salons SSE (`sse-starlette` déjà en dépendance) + job `arq` `refresh_coupe` toutes les 5 min (ZSET `coupe:s1`). Lire PLAN.md §2 F/G/I. Ne pas toucher à `xp.py` sans revue R1.
 
 ### R3 · Front et Stitch
 
@@ -66,4 +66,12 @@ Importer `DESIGN.md` dans Stitch, générer accueil + recette + Coupe (desktop e
 
 ### R4 · Tests, contenu, opérations
 
-Playwright : inscription → question → réponse → acceptation → XP ; recette → « Ça a marché ». Préparer 50 fiches de contenu (tableur). VPS Dakar / Caddy / sauvegarde `pg_dump`. Vérifier la CI (`alembic upgrade head` avant pytest) et le scan de licences.
+Parcours HTTP déjà couverts (pytest). Playwright n'est pas ajouté dans cette tranche (licence à vérifier + note ici). Préparer 50 fiches de contenu (tableur). VPS Dakar / Caddy / sauvegarde `pg_dump`. Vérifier la CI (`alembic upgrade head` avant pytest) et le scan de licences.
+
+**Coupe** : lecture ZSET Valkey, pas de SQL live, pas de bonus Capitaine. Flèches via snapshot précédent. Podium de la semaine en tête.
+
+**Capitaine** : l'auteur désigne une réponse ou recette par semaine (lundi UTC). ×2 seulement si un pair valide, via `multiplicateur` puis plafond 100/j.
+
+**Séries** : table `streaks`, gel auto au premier trou de la semaine, 0 XP. Utile compte comme « relire ».
+
+**Défis** : table `defis`, lundi 00:00 → dimanche 20:00 GMT. Seed #1 02/11, #2 09/11, #3 16/11. Podium lundi via `grant_xp`.

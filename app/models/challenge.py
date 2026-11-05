@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 
 class Challenge(Base):
-    __tablename__ = "challenges"
+    __tablename__ = "defis"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     title: Mapped[str] = mapped_column(String(200))
@@ -34,7 +34,7 @@ class ChallengeTag(Base):
     __tablename__ = "challenge_tags"
 
     challenge_id: Mapped[int] = mapped_column(
-        ForeignKey("challenges.id", ondelete="CASCADE"),
+        ForeignKey("defis.id", ondelete="CASCADE"),
         primary_key=True,
     )
     tag_id: Mapped[int] = mapped_column(

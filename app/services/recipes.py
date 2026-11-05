@@ -1,21 +1,22 @@
 from collections import Counter
-from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.core.countries import COUNTRY_CODES
-from app.models.enums import PostType, TagCategory
+from app.models.enums import PostType
 from app.models.post import Post
 from app.models.room_message import RoomMessage
 from app.models.tag import Tag
 from app.models.user import User
 from app.models.worked_report import WorkedReport
+from app.services.badges import award_user_badges
 from app.services.challenges import attach_challenge
 from app.services.notify import notify_worked
+from app.services.qa import QaError, load_context_tags
 from app.services.rooms import link_converted_post
-from app.services.xp import VALIDATOR_MIN_AGE_DAYS, grant_recipe_validated
+from app.services.xp import grant_recipe_published, grant_recipe_validated
 
 
 class RecipeError(Exception):
@@ -64,21 +65,34 @@ async def create_recipe(
     tag_ids: list[int],
     source_message_id: int | None = None,
     challenge_id: int | None = None,
+    probleme: str = "",
+    solution: str = "",
+    code: str = "",
+    prerequis: str = "",
+    versions: str = "",
+    limites: str = "",
 ) -> Post:
     title_clean = title.strip()
     body_clean = body.strip()
+    probleme_clean = probleme.strip()
+    solution_clean = solution.strip()
     if not title_clean or not body_clean:
         raise RecipeError("empty")
-    if not tag_ids:
-        raise RecipeError("need_country")
-    tags = list((await session.scalars(select(Tag).where(Tag.id.in_(tag_ids)))).all())
-    if not any(tag.category == TagCategory.PAYS for tag in tags):
-        raise RecipeError("need_country")
+    try:
+        tags = await load_context_tags(session, tag_ids)
+    except QaError as exc:
+        raise RecipeError(exc.code) from exc
     post = Post(
         type=PostType.RECETTE,
         author_id=author.id,
         title=title_clean,
         body=body_clean,
+        probleme=probleme_clean,
+        solution=solution_clean,
+        code=code.strip() or None,
+        prerequis=prerequis.strip() or None,
+        versions=versions.strip() or None,
+        limites=limites.strip() or None,
         tags=tags,
     )
     session.add(post)
@@ -89,16 +103,10 @@ async def create_recipe(
         post=post,
     )
     await attach_challenge(session, post, challenge_id)
+    await grant_recipe_published(session, recipe=post, author=author)
     await session.commit()
     await session.refresh(post)
     return post
-
-
-def _account_age(user: User) -> timedelta:
-    created = user.created_at
-    if created.tzinfo is None:
-        created = created.replace(tzinfo=UTC)
-    return datetime.now(UTC) - created
 
 
 def worked_counts(recipe: Post) -> dict[str, int]:
@@ -112,7 +120,7 @@ async def report_worked(
     user: User,
     country: str,
     environment: str,
-) -> WorkedReport:
+) -> tuple[WorkedReport, int]:
     if recipe.type != PostType.RECETTE:
         raise RecipeError("not_recipe")
     if recipe.author_id == user.id:
@@ -123,8 +131,6 @@ async def report_worked(
         raise RecipeError("bad_country")
     if not environment_clean:
         raise RecipeError("empty")
-    if _account_age(user) < timedelta(days=VALIDATOR_MIN_AGE_DAYS):
-        raise RecipeError("too_young")
 
     existing = await session.scalar(
         select(WorkedReport).where(
@@ -147,7 +153,7 @@ async def report_worked(
         author = await session.get(User, recipe.author_id)
     if author is None:
         raise RecipeError("not_recipe")
-    await grant_recipe_validated(
+    author_xp, _validator_xp = await grant_recipe_validated(
         session,
         recipe=recipe,
         validator=user,
@@ -156,4 +162,6 @@ async def report_worked(
     await session.commit()
     await session.refresh(report)
     await notify_worked(session, author=author, recipe_id=recipe.id)
-    return report
+    await award_user_badges(session, author)
+    await session.commit()
+    return report, author_xp

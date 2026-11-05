@@ -15,7 +15,18 @@ from app.services.system import SYSTEM_EMAIL
 
 logger = logging.getLogger("palabre.notify")
 
-KINDS = frozenset({"answer", "accepted", "worked", "challenge", "league_join"})
+KINDS = frozenset(
+    {
+        "answer",
+        "accepted",
+        "worked",
+        "challenge",
+        "league_join",
+        "merci",
+        "weekly",
+        "reminder",
+    }
+)
 
 
 def new_unsubscribe_token() -> str:
@@ -203,6 +214,21 @@ async def notify_challenge_open(
         )
 
 
+async def notify_merci(
+    session: AsyncSession,
+    *,
+    helper: User,
+    url: str,
+) -> None:
+    await notify(
+        session,
+        user=helper,
+        kind="merci",
+        title=t("notif_merci"),
+        url=url,
+    )
+
+
 async def notify_league_join(
     session: AsyncSession,
     *,
@@ -216,6 +242,50 @@ async def notify_league_join(
         title=t("notif_league_join"),
         url=f"/ligues/{code}",
     )
+
+
+async def notify_weekly_digest(session: AsyncSession) -> int:
+    users = list(
+        (
+            await session.scalars(
+                select(User).where(
+                    User.email != SYSTEM_EMAIL,
+                    User.handle.is_not(None),
+                )
+            )
+        ).all()
+    )
+    for user in users:
+        await notify(
+            session,
+            user=user,
+            kind="weekly",
+            title=t("notif_weekly"),
+            url="/classement",
+        )
+    return len(users)
+
+
+async def notify_challenge_reminder(session: AsyncSession) -> int:
+    users = list(
+        (
+            await session.scalars(
+                select(User).where(
+                    User.email != SYSTEM_EMAIL,
+                    User.handle.is_not(None),
+                )
+            )
+        ).all()
+    )
+    for user in users:
+        await notify(
+            session,
+            user=user,
+            kind="reminder",
+            title=t("notif_reminder"),
+            url="/defi",
+        )
+    return len(users)
 
 
 async def unsubscribe_by_token(session: AsyncSession, token: str) -> User | None:

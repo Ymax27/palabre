@@ -8,6 +8,29 @@
         <a class="pill" href="/recettes?tag={{ tag.slug }}">{{ tag.label }}</a>
       {% endfor %}
     </p>
+    {% if recipe.probleme %}
+      <h2>{{ t("recipe_probleme") }}</h2>
+      <div>{{ recipe.probleme | md }}</div>
+    {% endif %}
+    {% if recipe.solution %}
+      <h2>{{ t("recipe_solution") }}</h2>
+      <div>{{ recipe.solution | md }}</div>
+    {% endif %}
+    {% if recipe.code %}
+      <h2>{{ t("recipe_code") }}</h2>
+      <div>{{ recipe.code | md }}</div>
+    {% endif %}
+    {% if recipe.prerequis %}
+      <h2>{{ t("recipe_prerequis") }}</h2>
+      <div>{{ recipe.prerequis | md }}</div>
+    {% endif %}
+    {% if recipe.versions %}
+      <p>{{ t("recipe_versions") }} : {{ recipe.versions }}</p>
+    {% endif %}
+    {% if recipe.limites %}
+      <h2>{{ t("recipe_limites") }}</h2>
+      <div>{{ recipe.limites | md }}</div>
+    {% endif %}
     <div>{{ recipe.body | md }}</div>
     {% if recipe.source_message and recipe.source_message.room %}
       <p>
@@ -17,6 +40,19 @@
       </p>
     {% endif %}
     <p>{% set author = recipe.author %}{% include "partials/author.html" %}</p>
+    {% if user and recipe.author_id == user.id %}
+      <form method="post" action="/capitaine/{{ recipe.id }}">
+        <input type="hidden" name="csrf" value="{{ csrf }}">
+        <button type="submit" class="secondary">{{ t("captain_badge") }}</button>
+      </form>
+    {% endif %}
+    {% if user and recipe.author_id != user.id %}
+      <form method="post" action="/merci/{{ recipe.author_id }}">
+        <input type="hidden" name="csrf" value="{{ csrf }}">
+        <input type="hidden" name="url" value="/recettes/{{ recipe.id }}">
+        <button type="submit" class="secondary">{{ t("merci") }}</button>
+      </form>
+    {% endif %}
   </article>
   {% include "partials/marche.html" %}
 {% endblock %}

@@ -20,6 +20,7 @@ class User(Base):
     github_id: Mapped[str | None] = mapped_column(String(32), unique=True)
     country: Mapped[str | None] = mapped_column(String(2))
     stack: Mapped[str | None] = mapped_column(String(80))
+    locale: Mapped[str] = mapped_column(String(8), default="fr", server_default="fr")
     niveau: Mapped[int] = mapped_column(SmallInteger, default=0, server_default="0")
     is_admin: Mapped[bool] = mapped_column(
         Boolean,

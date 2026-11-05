@@ -8,6 +8,7 @@ from app.core.limiter import limiter
 from app.core.security import require_csrf
 from app.core.templates import templates, view_context
 from app.models.post import Post
+from app.models.user import User
 from app.services.challenges import featured_challenge
 from app.services.qa import (
     QaError,
@@ -20,6 +21,7 @@ from app.services.qa import (
     utile_count,
 )
 from app.services.qa import create_question as create_question_post
+from app.services.toast import flash_xp_toast
 
 router = APIRouter()
 
@@ -208,10 +210,62 @@ async def accept_submit(
     if answer is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     try:
-        await accept_answer(session, question=question, answer=answer, user=user)
+        awarded = await accept_answer(
+            session, question=question, answer=answer, user=user
+        )
+        reply = await session.get(User, answer.author_id)
+        await flash_xp_toast(
+            request,
+            session,
+            country=reply.country if reply else None,
+            awarded=awarded,
+        )
     except QaError:
         pass
     return RedirectResponse(
         f"/questions/{question_id}",
         status_code=status.HTTP_303_SEE_OTHER,
     )
+
+
+@router.post("/merci/{user_id}")
+async def merci_submit(
+    request: Request,
+    session: SessionDep,
+    user: OnboardedUser,
+    user_id: int,
+    csrf: str = Form(...),
+    url: str = Form("/"),
+) -> RedirectResponse:
+    require_csrf(request, csrf)
+    from app.services.notify import notify_merci
+
+    helper = await session.get(User, user_id)
+    if helper is not None and helper.id != user.id:
+        await notify_merci(session, helper=helper, url=url)
+    return RedirectResponse(url, status_code=status.HTTP_303_SEE_OTHER)
+
+
+@router.post("/capitaine/{post_id}")
+async def capitaine_submit(
+    request: Request,
+    session: SessionDep,
+    user: OnboardedUser,
+    post_id: int,
+    csrf: str = Form(...),
+) -> RedirectResponse:
+    require_csrf(request, csrf)
+    from app.services.captains import CaptainError, designate
+
+    post = await session.get(Post, post_id)
+    if post is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+    try:
+        await designate(session, user=user, post=post)
+    except CaptainError:
+        pass
+    if post.parent_id:
+        target = f"/questions/{post.parent_id}"
+    else:
+        target = f"/recettes/{post.id}"
+    return RedirectResponse(target, status_code=status.HTTP_303_SEE_OTHER)

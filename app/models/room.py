@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from sqlalchemy import String
+from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
@@ -17,5 +17,11 @@ class Room(Base):
     slug: Mapped[str] = mapped_column(String(40), unique=True)
     country: Mapped[str | None] = mapped_column(String(2))
     title: Mapped[str] = mapped_column(String(80))
+    question_id: Mapped[int | None] = mapped_column(
+        ForeignKey("posts.id", ondelete="SET NULL"),
+    )
+    league_id: Mapped[int | None] = mapped_column(
+        ForeignKey("leagues.id", ondelete="SET NULL"),
+    )
 
     messages: Mapped[list["RoomMessage"]] = relationship(back_populates="room")

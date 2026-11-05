@@ -10,12 +10,14 @@ from httpx import ASGITransport, AsyncClient
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.bus import get_redis
 from app.core.db import SessionLocal, engine
 from app.core.limiter import limiter
 from app.core.rate_limit import reset as reset_rate_limit
 from app.main import app
 from app.models.room import Room
 from app.models.user import User
+from app.services.ranking import COUPE_FORM, COUPE_PREV, COUPE_ZSET, RANK_SEASON
 
 MakeUser = Callable[..., Awaitable[User]]
 MakeRoom = Callable[..., Awaitable[Room]]
@@ -44,13 +46,16 @@ async def clean_db() -> AsyncIterator[None]:
         await session.execute(
             text(
                 "TRUNCATE TABLE magic_links, reactions, worked_reports, "
-                "xp_ledger, post_tags, posts, challenge_tags, challenges, "
+                "xp_ledger, post_tags, posts, challenge_tags, defis, "
                 "league_members, leagues, captain_picks, user_badges, "
-                "notifications, notification_prefs, "
+                "notifications, notification_prefs, user_stacks, "
+                "message_reactions, reports, post_helpers, streaks, "
                 "room_messages, rooms, users RESTART IDENTITY CASCADE"
             )
         )
         await session.commit()
+    redis = get_redis()
+    await redis.delete(COUPE_ZSET, COUPE_PREV, COUPE_FORM, RANK_SEASON)
     yield
 
 
@@ -106,7 +111,7 @@ def make_room(session: AsyncSession) -> MakeRoom:
         *,
         slug: str = "wave",
         title: str = "Wave",
-        kind: str = "theme",
+        kind: str = "stack",
         country: str | None = None,
     ) -> Room:
         room = Room(kind=kind, slug=slug, title=title, country=country)

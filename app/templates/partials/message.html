@@ -5,6 +5,30 @@
 >
   <p>{% set author = message.author %}{% include "partials/author.html" %}</p>
   <div>{{ message.body | md }}</div>
+  {% if user is defined and user and user.handle %}
+    <p>
+      {% for kind in ["✅", "🙏", "🔥"] %}
+        <form
+          method="post"
+          action="/salons/{{ slug }}/messages/{{ message.id }}/react"
+          style="display:inline"
+        >
+          <input type="hidden" name="csrf" value="{{ csrf }}">
+          <input type="hidden" name="kind" value="{{ kind }}">
+          <button type="submit" class="secondary">{{ kind }}</button>
+        </form>
+      {% endfor %}
+      <form
+        method="post"
+        action="/salons/{{ slug }}/messages/{{ message.id }}/signaler"
+        style="display:inline"
+      >
+        <input type="hidden" name="csrf" value="{{ csrf }}">
+        <input type="hidden" name="reason" value="signalement">
+        <button type="submit" class="secondary">{{ t("rooms_report") }}</button>
+      </form>
+    </p>
+  {% endif %}
   {% if message.converted_post_id %}
     {% if message.converted_post and message.converted_post.type == "recette" %}
       <p><a href="/recettes/{{ message.converted_post_id }}">{{ t("rooms_converted_recipe") }}</a></p>

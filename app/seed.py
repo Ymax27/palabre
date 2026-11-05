@@ -149,11 +149,28 @@ _VALIDATIONS: tuple[tuple[int, str, str, str], ...] = (
 )
 
 
+_CONTEXT_DEFAULTS = {
+    "pays": "sn",
+    "paiement": "wave",
+    "reseau": "3g",
+    "stack": "python",
+}
+
+
 async def _tag(session: AsyncSession, slug: str) -> Tag:
     tag = await session.scalar(select(Tag).where(Tag.slug == slug))
     if tag is None:
         raise RuntimeError(f"tag manquant: {slug} (alembic upgrade head ?)")
     return tag
+
+
+async def _context_ids(session: AsyncSession, slugs: tuple[str, ...]) -> list[int]:
+    tags = [await _tag(session, slug) for slug in slugs]
+    present = {tag.category for tag in tags}
+    for category, slug in _CONTEXT_DEFAULTS.items():
+        if category not in present:
+            tags.append(await _tag(session, slug))
+    return [tag.id for tag in tags]
 
 
 async def seed(session: AsyncSession) -> bool:
@@ -178,13 +195,12 @@ async def seed(session: AsyncSession) -> bool:
         await session.refresh(user)
 
     for handle, title, body, slugs in _QUESTIONS:
-        tags = [await _tag(session, slug) for slug in slugs]
         question = await create_question(
             session,
             author=users[handle],
             title=title,
             body=body,
-            tag_ids=[tag.id for tag in tags],
+            tag_ids=await _context_ids(session, slugs),
         )
         if handle == "askia" and title.startswith("Wave"):
             await add_answer(
@@ -199,13 +215,12 @@ async def seed(session: AsyncSession) -> bool:
 
     recipes = []
     for handle, title, body, slugs in _RECIPES:
-        tags = [await _tag(session, slug) for slug in slugs]
         recipe = await create_recipe(
             session,
             author=users[handle],
             title=title,
             body=body,
-            tag_ids=[tag.id for tag in tags],
+            tag_ids=await _context_ids(session, slugs),
         )
         recipes.append(recipe)
 
@@ -229,27 +244,35 @@ async def seed(session: AsyncSession) -> bool:
             "(pays + paiement) sur un timeout ou un webhook mobile money."
         ),
         starts_at=datetime(2026, 11, 2, tzinfo=UTC),
-        ends_at=datetime(2026, 11, 8, 23, 59, 59, tzinfo=UTC),
+        ends_at=datetime(2026, 11, 8, 20, 0, 0, tzinfo=UTC),
+        tag_ids=[wave.id, sn.id],
+    )
+    await create_challenge(
+        session,
+        title="Défi #2 : une recette qui tient",
+        description="Deuxième semaine : une recette contextualisée.",
+        starts_at=datetime(2026, 11, 9, tzinfo=UTC),
+        ends_at=datetime(2026, 11, 15, 20, 0, 0, tzinfo=UTC),
+        tag_ids=[wave.id, sn.id],
+    )
+    await create_challenge(
+        session,
+        title="Défi #3 : une recette qui tient",
+        description="Troisième semaine : une recette contextualisée.",
+        starts_at=datetime(2026, 11, 16, tzinfo=UTC),
+        ends_at=datetime(2026, 11, 22, 20, 0, 0, tzinfo=UTC),
         tag_ids=[wave.id, sn.id],
     )
     recipes[0].challenge_id = challenge.id
     current_week = week_start()
-    nov2 = datetime(2026, 11, 2, tzinfo=UTC)
     session.add(
         CaptainPick(
             week_start=current_week,
             country="CM",
             user_id=users["esther"].id,
+            post_id=recipes[5].id,
         )
     )
-    if current_week != nov2:
-        session.add(
-            CaptainPick(
-                week_start=nov2,
-                country="CM",
-                user_id=users["esther"].id,
-            )
-        )
     await session.commit()
     await award_badges(session)
     return True

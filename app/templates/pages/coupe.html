@@ -2,6 +2,16 @@
 {% block title %}Coupe des Nations · Palabre{% endblock %}
 {% block content %}
   <h1>Coupe des Nations</h1>
+  {% if week_podium %}
+    <section class="card">
+      <h2>{{ t("coupe_week_podium") }}</h2>
+      <ol>
+        {% for row in week_podium %}
+          <li>{{ row.label }} · {{ "%.1f"|format(row.score) }}</li>
+        {% endfor %}
+      </ol>
+    </section>
+  {% endif %}
   {% if not standings %}
     <p>Pas encore de classement. Les points d'un pays apparaissent après une première validation.</p>
   {% else %}
@@ -12,12 +22,12 @@
           <th>Pays</th>
           <th>Score</th>
           <th>{{ t("coupe_form") }}</th>
-          <th>{{ t("captain_badge") }}</th>
+          <th>{{ t("coupe_move") }}</th>
         </tr>
       </thead>
       <tbody>
         {% for row in standings %}
-          <tr>
+          <tr{% if row.rank <= 3 %} class="accepted"{% endif %}>
             <td>{{ row.rank }}</td>
             <td>{{ row.label }}</td>
             <td>{{ "%.1f"|format(row.score) }}</td>
@@ -30,10 +40,7 @@
               {% endfor %}
             </td>
             <td>
-              {% if row.captain_handle %}
-                <span class="xp-pill">C</span>
-                <a href="/u/{{ row.captain_handle }}">{{ row.captain_handle }}</a>
-              {% endif %}
+              {% if row.movement > 0 %}↑{{ row.movement }}{% elif row.movement < 0 %}↓{{ -row.movement }}{% else %}—{% endif %}
             </td>
           </tr>
         {% endfor %}

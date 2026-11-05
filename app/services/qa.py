@@ -2,6 +2,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from app.core.bus import publish_feed
 from app.models.enums import PostType, ReactionKind, TagCategory
 from app.models.post import Post
 from app.models.reaction import Reaction
@@ -12,6 +13,23 @@ from app.services.challenges import attach_challenge
 from app.services.notify import notify_accepted, notify_answer
 from app.services.rooms import link_converted_post
 from app.services.xp import grant_answer_accepted
+
+REQUIRED_TAG_CATEGORIES = (
+    TagCategory.PAYS,
+    TagCategory.PAIEMENT,
+    TagCategory.RESEAU,
+    TagCategory.STACK,
+)
+
+
+async def load_context_tags(session: AsyncSession, tag_ids: list[int]) -> list[Tag]:
+    if not tag_ids:
+        raise QaError("need_country")
+    tags = list((await session.scalars(select(Tag).where(Tag.id.in_(tag_ids)))).all())
+    present = {tag.category for tag in tags}
+    if any(category not in present for category in REQUIRED_TAG_CATEGORIES):
+        raise QaError("need_country")
+    return tags
 
 
 class QaError(Exception):
@@ -64,11 +82,7 @@ async def create_question(
     body_clean = body.strip()
     if not title_clean or not body_clean:
         raise QaError("empty")
-    if not tag_ids:
-        raise QaError("need_country")
-    tags = list((await session.scalars(select(Tag).where(Tag.id.in_(tag_ids)))).all())
-    if not any(tag.category == TagCategory.PAYS for tag in tags):
-        raise QaError("need_country")
+    tags = await load_context_tags(session, tag_ids)
     post = Post(
         type=PostType.QUESTION,
         author_id=author.id,
@@ -127,6 +141,7 @@ async def add_answer(
         target = await session.get(User, question.author_id)
         if target is not None:
             await notify_answer(session, author=target, question_id=question.id)
+    await publish_feed(f"answer:{question.id}")
     return answer
 
 
@@ -194,4 +209,5 @@ async def accept_answer(
         reply = await session.get(User, answer.author_id)
         if reply is not None:
             await notify_accepted(session, author=reply, question_id=question.id)
+    await publish_feed(f"accepted:{question.id}")
     return awarded

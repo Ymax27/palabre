@@ -25,6 +25,28 @@ def room_channel(room_id: int) -> str:
     return f"palabre:room:{room_id}"
 
 
+FEED_CHANNEL = "palabre:feed"
+
+
+async def publish_feed(payload: str) -> None:
+    await get_redis().publish(FEED_CHANNEL, payload)
+
+
+async def subscribe_feed() -> AsyncIterator[str]:
+    pubsub = get_redis().pubsub()
+    await pubsub.subscribe(FEED_CHANNEL)
+    try:
+        async for message in pubsub.listen():
+            if message.get("type") != "message":
+                continue
+            data = message.get("data")
+            if isinstance(data, str):
+                yield data
+    finally:
+        await pubsub.unsubscribe(FEED_CHANNEL)
+        await pubsub.aclose()  # type: ignore[no-untyped-call]
+
+
 async def publish_room(room_id: int, payload: str) -> None:
     await get_redis().publish(room_channel(room_id), payload)
 

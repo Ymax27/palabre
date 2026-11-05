@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}{{ t("nav_classement") }} · Palabre{% endblock %}
+{% block content %}
+  <h1>{{ t("nav_classement") }}</h1>
+  <p>
+    <a href="/classement?periode=semaine">{{ t("rank_week") }}</a>
+    ·
+    <a href="/classement?periode=saison">{{ t("rank_season") }}</a>
+  </p>
+  {% if not rows %}
+    <p>{{ t("rank_empty") }}</p>
+  {% else %}
+    <table>
+      <thead>
+        <tr><th>Rang</th><th>Pseudo</th><th>XP</th></tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}
+          <tr>
+            <td>{{ row.rank }}</td>
+            <td><a href="/u/{{ row.handle }}">{{ row.handle }}</a></td>
+            <td>{{ row.xp }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+{% endblock %}

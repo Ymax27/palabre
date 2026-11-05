@@ -19,6 +19,7 @@ from app.services.recipes import (
     report_worked,
     worked_counts,
 )
+from app.services.toast import flash_xp_toast
 
 router = APIRouter()
 
@@ -61,9 +62,24 @@ async def recipe_form(
     request: Request,
     session: SessionDep,
     user: OnboardedUser,
+    from_answer: int | None = None,
 ) -> HTMLResponse:
     groups = await tags_grouped(session)
     challenge = await featured_challenge(session)
+    prefill_title = ""
+    prefill_body = ""
+    prefill_probleme = ""
+    prefill_solution = ""
+    if from_answer is not None:
+        answer = await session.get(Post, from_answer)
+        if answer is not None and answer.type == "answer" and answer.body:
+            parent = (
+                await session.get(Post, answer.parent_id) if answer.parent_id else None
+            )
+            prefill_title = (parent.title if parent and parent.title else "")[:200]
+            prefill_body = answer.body
+            prefill_probleme = parent.body if parent else ""
+            prefill_solution = answer.body
     return templates.TemplateResponse(
         request,
         "pages/recipe_new.html",
@@ -74,6 +90,10 @@ async def recipe_form(
             tag_groups=groups,
             error=None,
             challenge=challenge,
+            prefill_title=prefill_title,
+            prefill_body=prefill_body,
+            prefill_probleme=prefill_probleme,
+            prefill_solution=prefill_solution,
         ),
     )
 
@@ -88,6 +108,12 @@ async def recipe_submit(
     body: str = Form(...),
     csrf: str = Form(...),
     source_message_id: str | None = Form(None),
+    probleme: str = Form(""),
+    solution: str = Form(""),
+    code: str = Form(""),
+    prerequis: str = Form(""),
+    versions: str = Form(""),
+    limites: str = Form(""),
 ) -> Response:
     require_csrf(request, csrf)
     form = await request.form()
@@ -102,6 +128,26 @@ async def recipe_submit(
     )
     join = form.get("join_challenge")
     challenge_id = int(join) if isinstance(join, str) and join.isdigit() else None
+    if not probleme.strip() or not solution.strip():
+        groups = await tags_grouped(session)
+        return templates.TemplateResponse(
+            request,
+            "pages/recipe_new.html",
+            await view_context(
+                request,
+                session,
+                user,
+                tag_groups=groups,
+                error=t("recipe_empty"),
+                challenge=await featured_challenge(session),
+                prefill_title=title,
+                prefill_body=body,
+                prefill_probleme=probleme,
+                prefill_solution=solution,
+                source_message_id=source_id,
+            ),
+            status_code=status.HTTP_400_BAD_REQUEST,
+        )
     try:
         recipe = await create_recipe(
             session,
@@ -111,6 +157,12 @@ async def recipe_submit(
             tag_ids=tag_ids,
             source_message_id=source_id,
             challenge_id=challenge_id,
+            probleme=probleme,
+            solution=solution,
+            code=code,
+            prerequis=prerequis,
+            versions=versions,
+            limites=limites,
         )
     except RecipeError as exc:
         groups = await tags_grouped(session)
@@ -183,12 +235,18 @@ async def marche_submit(
     recipe = await _recipe_or_404(session, recipe_id)
     error: str | None = None
     try:
-        await report_worked(
+        _report, awarded = await report_worked(
             session,
             recipe=recipe,
             user=user,
             country=country,
             environment=environment,
+        )
+        await flash_xp_toast(
+            request,
+            session,
+            country=recipe.author.country if recipe.author else None,
+            awarded=awarded,
         )
     except RecipeError as exc:
         error = _marche_error(exc.code)

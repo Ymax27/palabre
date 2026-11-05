@@ -12,6 +12,7 @@ from app.services.challenges import create_challenge
 from app.services.leagues import create_league, join_league
 from app.services.qa import accept_answer, add_answer, create_question
 from app.services.recipes import create_recipe, report_worked
+from tests.helpers import context_tag_ids
 
 MakeUser = Callable[..., Awaitable[User]]
 
@@ -46,17 +47,14 @@ async def test_one_notification_per_event_no_smtp(
         country="KE",
         created_at=old,
     )
-    pays = await session.scalar(
-        select(Tag).where(Tag.category == "pays", Tag.slug == "sn")
-    )
-    assert pays is not None
-
+    tags = await context_tag_ids(session)
+    pays = await session.scalar(select(Tag).where(Tag.slug == "sn"))
     question = await create_question(
         session,
         author=asker,
         title="Timeout Wave",
         body="ça coupe",
-        tag_ids=[pays.id],
+        tag_ids=tags,
     )
     answer = await add_answer(
         session,
@@ -71,7 +69,7 @@ async def test_one_notification_per_event_no_smtp(
         author=asker,
         title="Retry Wave",
         body="Timeout 15 s",
-        tag_ids=[pays.id],
+        tag_ids=tags,
     )
     await report_worked(
         session,

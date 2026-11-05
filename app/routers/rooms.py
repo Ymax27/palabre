@@ -27,6 +27,10 @@ from app.services.rooms import (
     list_rooms,
     mark_needs_help,
     post_message,
+    presence_count,
+    react_message,
+    report_message,
+    touch_presence,
 )
 
 router = APIRouter()
@@ -98,6 +102,11 @@ async def room_detail(
 ) -> HTMLResponse:
     room = await _room_or_404(session, slug)
     messages = await last_messages(session, room.id)
+    here = 0
+    if user is not None:
+        here = await touch_presence(room.id, user.id)
+    else:
+        here = await presence_count(room.id)
     return templates.TemplateResponse(
         request,
         "pages/room.html",
@@ -107,6 +116,7 @@ async def room_detail(
             user,
             room=room,
             messages=messages,
+            here=here,
         ),
     )
 
@@ -135,11 +145,63 @@ async def room_post_message(
             body=body,
             parent_id=parent,
         )
-    except RoomError:
+    except RoomError as exc:
+        if exc.code == "slow":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=t("rooms_slow"),
+            ) from None
+        if exc.code == "no_links":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=t("rooms_no_links"),
+            ) from None
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST) from None
     html = _message_html(message, csrf=csrf, user=user, room_slug=room.slug)
     await publish_room(room.id, json.dumps(html))
     return HTMLResponse(html)
+
+
+@router.post("/salons/{slug}/messages/{message_id}/react", response_class=HTMLResponse)
+async def room_react(
+    request: Request,
+    session: SessionDep,
+    user: OnboardedUser,
+    slug: str,
+    message_id: int,
+    csrf: str = Form(...),
+    kind: str = Form(...),
+) -> HTMLResponse:
+    require_csrf(request, csrf)
+    room = await _room_or_404(session, slug)
+    message = await _message_in_room(session, room, message_id)
+    try:
+        await react_message(session, message=message, user=user, kind=kind)
+    except RoomError:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST) from None
+    message = await _message_in_room(session, room, message_id)
+    html = _message_html(message, csrf=csrf, user=user, room_slug=room.slug)
+    return HTMLResponse(html)
+
+
+@router.post("/salons/{slug}/messages/{message_id}/signaler")
+async def room_report(
+    request: Request,
+    session: SessionDep,
+    user: OnboardedUser,
+    slug: str,
+    message_id: int,
+    csrf: str = Form(...),
+    reason: str = Form("signalement"),
+) -> RedirectResponse:
+    require_csrf(request, csrf)
+    room = await _room_or_404(session, slug)
+    message = await _message_in_room(session, room, message_id)
+    try:
+        await report_message(session, message=message, user=user, reason=reason)
+    except RoomError:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST) from None
+    return RedirectResponse(f"/salons/{slug}", status_code=status.HTTP_303_SEE_OTHER)
 
 
 @router.post("/salons/{slug}/messages/{message_id}/aide", response_class=HTMLResponse)

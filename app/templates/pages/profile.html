@@ -1,16 +1,31 @@
 {% extends "base.html" %}
 {% block title %}{{ profile.user.handle }} · Palabre{% endblock %}
 {% block content %}
-  <h1>@{{ profile.user.handle }}</h1>
-  <p>
-    {% if profile.country_label %}{{ profile.country_label }}{% endif %}
-    {% if profile.user.stack %} · {{ profile.user.stack }}{% endif %}
-  </p>
-  <p><strong>{{ profile.xp }} XP</strong> · {{ niveau_label }}
-    {% if profile.streak > 0 %}
-      · {{ profile.streak }} {{ t("streak_days") }}
-    {% endif %}
-  </p>
+  <div class="profile-header">
+    <span
+      class="avatar-ring{% if profile.level_key == 'nouveau' %} is-open{% endif %}"
+      style="--ring-progress: {{ profile.progress }}"
+      title="{{ t('level_' + profile.level_key) }}"
+      aria-label="{{ t('level_' + profile.level_key) }}"
+    >
+      <span class="avatar-core">{{ profile.user.handle[0]|upper }}</span>
+    </span>
+    <div>
+      <h1>@{{ profile.user.handle }}</h1>
+      <p>
+        {% if profile.country_label %}{{ profile.country_label }}{% endif %}
+        {% if profile.user.stack %} · {{ profile.user.stack }}{% endif %}
+      </p>
+      <p>
+        <strong>{{ profile.xp }} XP</strong>
+        · {{ t("level_" + profile.level_key) }}
+        · {{ profile.rep }} {{ t("rep_label") }}
+        {% if profile.streak > 0 %}
+          · {{ profile.streak }} {{ t("streak_days") }}
+        {% endif %}
+      </p>
+    </div>
+  </div>
   {% if profile.is_captain %}
     <p><span class="xp-pill" title="{{ t('captain_badge') }}">C</span> {{ t("captain_badge") }}</p>
   {% endif %}

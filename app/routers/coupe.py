@@ -15,8 +15,17 @@ async def coupe_page(
     user: CurrentUser,
 ) -> HTMLResponse:
     standings = await coupe_standings(session)
+    week_podium = [row for row in standings if row.form and row.form[-1] > 0][:3]
+    if not week_podium:
+        week_podium = standings[:3]
     return templates.TemplateResponse(
         request,
         "pages/coupe.html",
-        await view_context(request, session, user, standings=standings),
+        await view_context(
+            request,
+            session,
+            user,
+            standings=standings,
+            week_podium=week_podium,
+        ),
     )

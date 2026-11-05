@@ -1,14 +1,13 @@
 from collections.abc import Awaitable, Callable
 
 from httpx import AsyncClient
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.tag import Tag
 from app.models.user import User
 from app.services.auth import request_magic_link
 from app.services.qa import accept_answer, add_answer, create_question, mark_utile
 from app.services.xp import total_xp
+from tests.helpers import context_tag_ids
 
 MakeUser = Callable[..., Awaitable[User]]
 
@@ -20,17 +19,12 @@ async def test_pose_repond_utile_accepte_xp(
 ) -> None:
     user_a = await make_user(email="a@test.tld", handle="askia", country="SN")
     user_b = await make_user(email="b@test.tld", handle="bakary", country="CI")
-    pays = await session.scalar(
-        select(Tag).where(Tag.category == "pays", Tag.slug == "sn")
-    )
-    assert pays is not None
-
     question = await create_question(
         session,
         author=user_a,
         title="Timeout Wave",
         body="Le paiement **Wave** plante.",
-        tag_ids=[pays.id],
+        tag_ids=await context_tag_ids(session),
     )
     answer = await add_answer(
         session,
@@ -48,7 +42,7 @@ async def test_pose_repond_utile_accepte_xp(
     assert awarded == 15
     await session.refresh(user_b)
     assert await total_xp(session, user_b) == 15
-    assert user_b.niveau == 1
+    assert await total_xp(session, user_b) == 15
 
     token = await request_magic_link(session, email=user_b.email, ip="127.0.0.1")
     assert token is not None

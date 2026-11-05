@@ -10,11 +10,23 @@
     {% endif %}
     <label for="title">Titre</label>
     <input id="title" name="title" required maxlength="200" value="{{ prefill_title|default('') }}">
+    <label for="probleme">{{ t("recipe_probleme") }}</label>
+    <textarea id="probleme" name="probleme" rows="4" required>{{ prefill_probleme|default('') }}</textarea>
+    <label for="solution">{{ t("recipe_solution") }}</label>
+    <textarea id="solution" name="solution" rows="4" required>{{ prefill_solution|default('') }}</textarea>
+    <label for="code">{{ t("recipe_code") }}</label>
+    <textarea id="code" name="code" rows="6">{{ prefill_code|default('') }}</textarea>
+    <label for="prerequis">{{ t("recipe_prerequis") }}</label>
+    <textarea id="prerequis" name="prerequis" rows="3">{{ prefill_prerequis|default('') }}</textarea>
+    <label for="versions">{{ t("recipe_versions") }}</label>
+    <input id="versions" name="versions" value="{{ prefill_versions|default('') }}">
+    <label for="limites">{{ t("recipe_limites") }}</label>
+    <textarea id="limites" name="limites" rows="3">{{ prefill_limites|default('') }}</textarea>
     <label for="body">{{ t("recipe_steps") }}</label>
-    <textarea id="body" name="body" rows="12" required placeholder="1. Prérequis&#10;2. Étapes&#10;3. Limites">{{ prefill_body|default('') }}</textarea>
+    <textarea id="body" name="body" rows="8" required>{{ prefill_body|default('') }}</textarea>
     {% for category, tags in tag_groups.items() %}
       <fieldset class="tag-group">
-        <legend>{{ category }}{% if category == "pays" %} (au moins un){% endif %}</legend>
+        <legend>{{ category }} ({{ t("tag_required") }})</legend>
         {% for tag in tags %}
           <label>
             <input type="checkbox" name="tag_id" value="{{ tag.id }}">

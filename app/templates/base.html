@@ -55,6 +55,41 @@
         font-size: 0.875rem;
         font-weight: 600;
       }
+      .profile-header {
+        display: flex;
+        align-items: center;
+        gap: var(--s-4);
+        margin-bottom: var(--s-4);
+      }
+      .avatar-ring {
+        --ring-progress: 0;
+        width: 4rem;
+        height: 4rem;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        background: conic-gradient(
+          var(--ochre-400) calc(var(--ring-progress) * 360deg),
+          var(--sand-300) 0
+        );
+        flex-shrink: 0;
+      }
+      .avatar-ring.is-open {
+        background: conic-gradient(
+          var(--sand-300) 0deg 300deg,
+          transparent 300deg 360deg
+        );
+      }
+      .avatar-core {
+        width: 3.15rem;
+        height: 3.15rem;
+        border-radius: 50%;
+        background: var(--sand-50);
+        color: var(--ink-900);
+        display: grid;
+        place-items: center;
+        font-weight: 700;
+      }
       .pill {
         display: inline-block;
         border: 1px solid var(--sand-300);
@@ -149,7 +184,10 @@
           {"label": {{ t("recipe_new")|tojson }}, "href": "/recettes/nouvelle"},
           {"label": {{ t("nav_coupe")|tojson }}, "href": "/coupe"},
           {"label": {{ t("nav_challenge")|tojson }}, "href": "/defi"},
-          {"label": {{ t("nav_leagues")|tojson }}, "href": "/ligues"}
+          {"label": {{ t("nav_leagues")|tojson }}, "href": "/ligues"},
+          {"label": "Sénégal", "href": "/salons/sn"},
+          {"label": "Wave", "href": "/recherche?tag=wave"},
+          {"label": {{ t("nav_classement")|tojson }}, "href": "/classement"}
         ]
       })'
       @keydown.window="onKey($event)"
@@ -225,7 +263,7 @@
         </a>
         <div id="notif-drawer"></div>
       {% endif %}
-      {% if user is defined and user and xp is defined and xp > 0 %}
+      {% if user is defined and user and contributed is defined and contributed %}
         <span class="xp-pill" id="xp-pill">
           {{ xp }} XP
           {% if streak is defined and streak > 0 %} · {{ streak }} j{% endif %}
@@ -246,6 +284,9 @@
       {% endif %}
     </header>
     <main>
+      {% if toast is defined and toast %}
+        <p class="card" id="xp-toast" role="status">{{ toast }}</p>
+      {% endif %}
       {% block content %}{% endblock %}
     </main>
     {% block scripts %}{% endblock %}

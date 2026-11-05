@@ -1,8 +1,10 @@
 from collections.abc import Awaitable, Callable
 
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.enums import XpReason
+from app.models.room import Room
 from app.models.user import User
 from app.models.xp_ledger import XpLedger
 from app.services.leagues import (
@@ -26,6 +28,11 @@ async def test_create_join_and_season_order(
 
     league = await create_league(session, owner=owner, name="Baobab")
     assert league.invite_code
+    room = await session.scalar(select(Room).where(Room.league_id == league.id))
+    assert room is not None
+    assert room.kind == "ligue"
+    ledger = await session.scalar(select(func.count()).select_from(XpLedger))
+    assert int(ledger or 0) == 0
     joined = await join_league(session, user=member, code=league.invite_code)
     assert joined.id == league.id
     await join_league(session, user=extra, code=league.invite_code)

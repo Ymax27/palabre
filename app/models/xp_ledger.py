@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String, func
+from sqlalchemy import DateTime, ForeignKey, Integer, SmallInteger, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
@@ -26,6 +26,13 @@ class XpLedger(Base):
     )
     source_user_id: Mapped[int | None] = mapped_column(
         ForeignKey("users.id", ondelete="SET NULL"),
+    )
+    rep: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+    saison: Mapped[int | None] = mapped_column(SmallInteger)
+    multiplicateur: Mapped[int] = mapped_column(
+        SmallInteger,
+        default=1,
+        server_default="1",
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),

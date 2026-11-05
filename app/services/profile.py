@@ -12,18 +12,27 @@ from app.models.user import User
 from app.services.badges import list_user_badges
 from app.services.captains import is_current_captain
 from app.services.streaks import current_streak
-from app.services.xp import reputation_level, total_xp
+from app.services.xp import (
+    can_edit,
+    can_moderate,
+    rep_progress,
+    reputation_level,
+    total_rep,
+    total_xp,
+)
 
 _COUNTRY_LABELS = dict(AFRICAN_COUNTRIES)
-
-LEVEL_KEYS = ("level_nouveau", "level_membre", "level_pilier", "level_ancien")
 
 
 @dataclass(frozen=True)
 class PublicProfile:
     user: User
     xp: int
-    niveau: int
+    rep: int
+    level_key: str
+    progress: float
+    can_edit: bool
+    can_moderate: bool
     country_label: str
     questions: list[Post]
     answers: list[Post]
@@ -41,6 +50,7 @@ async def get_public_profile(
     if user is None:
         return None
     xp = await total_xp(session, user)
+    rep = await total_rep(session, user)
     posts = list(
         (
             await session.scalars(
@@ -58,7 +68,11 @@ async def get_public_profile(
     return PublicProfile(
         user=user,
         xp=xp,
-        niveau=reputation_level(xp),
+        rep=rep,
+        level_key=reputation_level(rep),
+        progress=rep_progress(rep),
+        can_edit=can_edit(rep),
+        can_moderate=can_moderate(rep),
         country_label=_COUNTRY_LABELS.get(country, country),
         questions=questions,
         answers=answers,

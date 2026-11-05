@@ -1,6 +1,10 @@
+from collections.abc import AsyncIterator
+
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
+from sse_starlette.sse import EventSourceResponse
 
+from app.core.bus import subscribe_feed
 from app.core.deps import CurrentUser, SessionDep
 from app.core.templates import templates, view_context
 from app.services.qa import list_questions, tags_grouped
@@ -29,3 +33,13 @@ async def feed(
             active_tag=tag,
         ),
     )
+
+
+@router.get("/fil/events")
+async def feed_events() -> EventSourceResponse:
+    async def _stream() -> AsyncIterator[dict[str, str]]:
+        yield {"comment": "connected"}
+        async for payload in subscribe_feed():
+            yield {"data": payload}
+
+    return EventSourceResponse(_stream())

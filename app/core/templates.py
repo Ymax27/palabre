@@ -12,7 +12,7 @@ from app.models.user import User
 from app.services.markdown import render_markdown
 from app.services.notify import unread_count
 from app.services.streaks import current_streak
-from app.services.xp import total_xp
+from app.services.xp import has_contribution, total_xp
 
 TEMPLATES_DIR = Path(__file__).resolve().parent.parent / "templates"
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
@@ -35,11 +35,18 @@ async def view_context(
     xp = await total_xp(session, user) if user is not None else 0
     streak = await current_streak(session, user) if user is not None else 0
     unread = await unread_count(session, user) if user is not None else 0
+    contributed = await has_contribution(session, user) if user is not None else False
+    toast = ""
+    if hasattr(request, "session"):
+        raw = request.session.pop("toast", "")
+        toast = raw if isinstance(raw, str) else ""
     ctx: dict[str, Any] = {
         "user": user,
         "xp": xp,
         "streak": streak,
         "unread": unread,
+        "contributed": contributed,
+        "toast": toast,
         "csrf": csrf_token(request),
         "t": t,
     }

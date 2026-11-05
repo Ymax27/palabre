@@ -1,5 +1,6 @@
 from collections.abc import Awaitable, Callable
 
+import pytest
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -17,7 +18,9 @@ async def test_room_messages_return_429_over_limit(
     client: AsyncClient,
     make_user: MakeUser,
     make_room: MakeRoom,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    monkeypatch.setattr("app.services.rooms.SLOW_SECONDS", 0)
     user = await make_user(email="a@test.tld", handle="askia")
     room = await make_room()
     await login_client(client, session, user)

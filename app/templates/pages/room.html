@@ -3,6 +3,9 @@
 {% block content %}
   <p><a href="/salons">{{ t("nav_rooms") }}</a></p>
   <h1>{{ room.title }}</h1>
+  {% if here is defined %}
+    <p>{{ here }} {{ t("rooms_here") }}</p>
+  {% endif %}
   <div
     x-data="roomStream('{{ room.slug }}')"
     x-init="open()"

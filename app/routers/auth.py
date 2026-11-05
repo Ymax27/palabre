@@ -3,7 +3,7 @@ from typing import Any, cast
 from authlib.integrations.starlette_client import OAuthError  # type: ignore[import-untyped]
 from fastapi import APIRouter, Form, Request, status
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
-from sqlalchemy import select
+from sqlalchemy import delete, select
 
 from app.core.config import settings
 from app.core.countries import AFRICAN_COUNTRIES, COUNTRY_CODES
@@ -11,8 +11,10 @@ from app.core.deps import CurrentUser, LoginUser, SessionDep, is_onboarded
 from app.core.oauth import github_client, github_configured
 from app.core.security import csrf_token, require_csrf
 from app.core.templates import templates
+from app.models.enums import TagCategory
 from app.models.tag import Tag
 from app.models.user import User
+from app.models.user_stack import UserStack
 from app.services.auth import (
     GitHubAuthError,
     MagicLinkError,
@@ -125,6 +127,45 @@ async def github_callback(request: Request, session: SessionDep) -> Response:
     return RedirectResponse(target, status_code=status.HTTP_303_SEE_OTHER)
 
 
+async def _onboarding_step(session: SessionDep, user: User) -> int:
+    if not user.handle or not user.country:
+        return 1
+    stacked = await session.scalar(
+        select(UserStack.tag_id).where(UserStack.user_id == user.id)
+    )
+    if stacked is None:
+        return 2
+    return 3
+
+
+async def _onboarding_page(
+    request: Request,
+    session: SessionDep,
+    user: User,
+    *,
+    error: str | None = None,
+    status_code: int = 200,
+) -> HTMLResponse:
+    stacks = (
+        await session.scalars(
+            select(Tag).where(Tag.category == TagCategory.STACK).order_by(Tag.label)
+        )
+    ).all()
+    return templates.TemplateResponse(
+        request,
+        "pages/onboarding.html",
+        {
+            "csrf": csrf_token(request),
+            "countries": AFRICAN_COUNTRIES,
+            "stacks": stacks,
+            "step": await _onboarding_step(session, user),
+            "user": user,
+            "error": error,
+        },
+        status_code=status_code,
+    )
+
+
 @router.get("/onboarding", response_class=HTMLResponse)
 async def onboarding_form(
     request: Request,
@@ -133,18 +174,7 @@ async def onboarding_form(
 ) -> Response:
     if is_onboarded(user):
         return RedirectResponse("/", status_code=status.HTTP_303_SEE_OTHER)
-    stack_stmt = select(Tag).where(Tag.category == "stack").order_by(Tag.label)
-    stacks = (await session.scalars(stack_stmt)).all()
-    return templates.TemplateResponse(
-        request,
-        "pages/onboarding.html",
-        {
-            "csrf": csrf_token(request),
-            "countries": AFRICAN_COUNTRIES,
-            "stacks": stacks,
-            "error": None,
-        },
-    )
+    return await _onboarding_page(request, session, user)
 
 
 @router.post("/onboarding", response_class=HTMLResponse)
@@ -152,53 +182,80 @@ async def onboarding_submit(
     request: Request,
     session: SessionDep,
     user: LoginUser,
-    handle: str = Form(...),
-    country: str = Form(...),
-    stack: str = Form(...),
     csrf: str = Form(...),
+    step: int = Form(1),
+    handle: str = Form(""),
+    country: str = Form(""),
+    locale: str = Form("fr"),
 ) -> Response:
     require_csrf(request, csrf)
-    handle_clean = handle.strip().lstrip("@")
-    stack_clean = stack.strip()
-    country_clean = country.strip().upper()
-    error: str | None = None
-    if len(handle_clean) < 3 or len(handle_clean) > 40:
-        error = "Le pseudo doit faire entre 3 et 40 caractères."
-    elif not handle_clean.replace("_", "").isalnum():
-        error = "Le pseudo n'accepte que des lettres, chiffres et _."
-    elif country_clean not in COUNTRY_CODES:
-        error = "Choisis un pays dans la liste."
-    elif not stack_clean:
-        error = "Indique ta stack principale."
-
-    if error is None:
-        taken = await session.scalar(
-            select(User.id).where(User.handle == handle_clean, User.id != user.id)
-        )
-        if taken is not None:
-            error = "Ce pseudo est déjà pris."
-
-    if error is not None:
-        stacks = (
-            await session.scalars(
-                select(Tag).where(Tag.category == "stack").order_by(Tag.label)
+    form = await request.form()
+    if step == 1:
+        handle_clean = handle.strip().lstrip("@")
+        country_clean = country.strip().upper()
+        error: str | None = None
+        if len(handle_clean) < 3 or len(handle_clean) > 40:
+            error = "Le pseudo doit faire entre 3 et 40 caractères."
+        elif not handle_clean.replace("_", "").isalnum():
+            error = "Le pseudo n'accepte que des lettres, chiffres et _."
+        elif country_clean not in COUNTRY_CODES:
+            error = "Choisis un pays dans la liste."
+        else:
+            taken = await session.scalar(
+                select(User.id).where(
+                    User.handle == handle_clean,
+                    User.id != user.id,
+                )
             )
-        ).all()
-        return templates.TemplateResponse(
-            request,
-            "pages/onboarding.html",
-            {
-                "csrf": csrf_token(request),
-                "countries": AFRICAN_COUNTRIES,
-                "stacks": stacks,
-                "error": error,
-            },
-            status_code=status.HTTP_400_BAD_REQUEST,
+            if taken is not None:
+                error = "Ce pseudo est déjà pris."
+        if error is not None:
+            return await _onboarding_page(
+                request, session, user, error=error, status_code=400
+            )
+        user.handle = handle_clean
+        user.country = country_clean
+        await session.commit()
+        return RedirectResponse("/onboarding", status_code=status.HTTP_303_SEE_OTHER)
+    if step == 2:
+        raw = form.getlist("stack_id")
+        tag_ids = [
+            int(value) for value in raw if isinstance(value, str) and value.isdigit()
+        ]
+        tags = list(
+            (
+                await session.scalars(
+                    select(Tag).where(
+                        Tag.id.in_(tag_ids),
+                        Tag.category == TagCategory.STACK,
+                    )
+                )
+            ).all()
         )
-
-    user.handle = handle_clean
-    user.country = country_clean
-    user.stack = stack_clean[:80]
+        if not tags:
+            return await _onboarding_page(
+                request,
+                session,
+                user,
+                error="Choisis au moins une stack.",
+                status_code=400,
+            )
+        await session.execute(delete(UserStack).where(UserStack.user_id == user.id))
+        for tag in tags:
+            session.add(UserStack(user_id=user.id, tag_id=tag.id))
+        await session.commit()
+        return RedirectResponse("/onboarding", status_code=status.HTTP_303_SEE_OTHER)
+    locale_clean = locale.strip().lower()
+    if locale_clean not in {"fr", "en"}:
+        locale_clean = "fr"
+    user.locale = locale_clean
+    first_stack = await session.scalar(
+        select(Tag.label)
+        .join(UserStack, UserStack.tag_id == Tag.id)
+        .where(UserStack.user_id == user.id)
+    )
+    if first_stack:
+        user.stack = first_stack[:80]
     await session.commit()
     return RedirectResponse("/", status_code=status.HTTP_303_SEE_OTHER)
 

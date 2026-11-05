@@ -1,15 +1,18 @@
 import secrets
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from app.models.enums import RoomKind
 from app.models.league import League, LeagueMember
+from app.models.room import Room
 from app.models.user import User
 from app.models.xp_ledger import XpLedger
 from app.services.notify import notify_league_join
+from app.services.weeks import week_start
 
 SEASON_START = datetime(2026, 11, 2, tzinfo=UTC)
 SEASON_END = datetime(2026, 11, 22, 23, 59, 59, tzinfo=UTC)
@@ -58,6 +61,14 @@ async def create_league(session: AsyncSession, *, owner: User, name: str) -> Lea
     session.add(league)
     await session.flush()
     session.add(LeagueMember(league_id=league.id, user_id=owner.id))
+    session.add(
+        Room(
+            kind=RoomKind.LIGUE,
+            slug=f"ligue-{league.invite_code.lower()}",
+            title=league.name,
+            league_id=league.id,
+        )
+    )
     await session.commit()
     await session.refresh(league)
     return league
@@ -87,20 +98,27 @@ async def join_league(session: AsyncSession, *, user: User, code: str) -> League
     return league
 
 
-async def league_standings(session: AsyncSession, league: League) -> list[LeagueRow]:
+async def league_standings(
+    session: AsyncSession,
+    league: League,
+    *,
+    weekly: bool = False,
+) -> list[LeagueRow]:
     members = (
         select(LeagueMember.user_id)
         .where(LeagueMember.league_id == league.id)
         .subquery()
     )
+    start = week_start() if weekly else SEASON_START
+    end = start + timedelta(days=7) if weekly else SEASON_END
     stmt = (
         select(User, func.coalesce(func.sum(XpLedger.delta), 0).label("xp"))
         .join(members, members.c.user_id == User.id)
         .outerjoin(
             XpLedger,
             (XpLedger.user_id == User.id)
-            & (XpLedger.created_at >= SEASON_START)
-            & (XpLedger.created_at <= SEASON_END),
+            & (XpLedger.created_at >= start)
+            & (XpLedger.created_at <= end),
         )
         .group_by(User.id)
         .order_by(func.coalesce(func.sum(XpLedger.delta), 0).desc())

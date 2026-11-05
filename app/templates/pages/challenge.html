@@ -14,6 +14,10 @@
         {% endfor %}
       </p>
       <p>{{ t("challenge_window") }} {{ challenge.starts_at.strftime("%d/%m") }} – {{ challenge.ends_at.strftime("%d/%m") }} UTC</p>
+      {% if remaining %}
+        <p>{{ remaining }}</p>
+        <p>{{ posts|length }} {{ t("challenge_participants") }}</p>
+      {% endif %}
     </article>
     <h2>{{ t("challenge_posts") }}</h2>
     {% if not posts %}
