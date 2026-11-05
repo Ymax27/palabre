@@ -74,4 +74,6 @@ Parcours HTTP déjà couverts (pytest). Playwright n'est pas ajouté dans cette 
 
 **Séries** : table `streaks`, gel auto au premier trou de la semaine, 0 XP. Utile compte comme « relire ».
 
-**Défis** : table `defis`, lundi 00:00 → dimanche 20:00 GMT. Seed #1 02/11, #2 09/11, #3 16/11. Podium lundi via `grant_xp`.
+**Défis** : table `defis`, lundi 00:00 → dimanche 20:00 GMT. Seed #1 02/11 (« Timeout Wave : une recette qui tient »), #2 09/11, #3 16/11. Participation = post tagué ; podium = XP pair, +30/+20/+10 via `grant_xp`, plafond 100/j. Rappel email dimanche 16:00 GMT ; digest lundi 08:00 GMT → `/classement`. Carte défi (compte à rebours + participants) à droite sur l'accueil desktop et page `/defi`.
+
+**Notifications** : cloche in-app (réponse, acceptation, validation, rappel, digest, Merci). Emails Brevo (`SMTP_*` dans `.env`) pour réponse / acceptation / validation / rappel / digest — prefs par type. Merci = in-app seulement, 0 XP. Envoi hors requête via arq.

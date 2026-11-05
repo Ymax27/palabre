@@ -8,10 +8,33 @@
       <input type="checkbox" name="in_app"{% if prefs.in_app %} checked{% endif %}>
       {{ t("notif_pref_in_app") }}
     </label>
-    <label>
-      <input type="checkbox" name="email"{% if prefs.email %} checked{% endif %}>
-      {{ t("notif_pref_email") }}
-    </label>
+    <fieldset>
+      <legend>{{ t("notif_pref_email") }}</legend>
+      <label>
+        <input type="checkbox" name="email"{% if prefs.email %} checked{% endif %}>
+        {{ t("notif_pref_email_master") }}
+      </label>
+      <label>
+        <input type="checkbox" name="email_answer"{% if prefs.email_answer %} checked{% endif %}>
+        {{ t("notif_pref_email_answer") }}
+      </label>
+      <label>
+        <input type="checkbox" name="email_accepted"{% if prefs.email_accepted %} checked{% endif %}>
+        {{ t("notif_pref_email_accepted") }}
+      </label>
+      <label>
+        <input type="checkbox" name="email_worked"{% if prefs.email_worked %} checked{% endif %}>
+        {{ t("notif_pref_email_worked") }}
+      </label>
+      <label>
+        <input type="checkbox" name="email_reminder"{% if prefs.email_reminder %} checked{% endif %}>
+        {{ t("notif_pref_email_reminder") }}
+      </label>
+      <label>
+        <input type="checkbox" name="email_weekly"{% if prefs.email_weekly %} checked{% endif %}>
+        {{ t("notif_pref_email_weekly") }}
+      </label>
+    </fieldset>
     <button type="submit">{{ t("notif_save") }}</button>
   </form>
 {% endblock %}

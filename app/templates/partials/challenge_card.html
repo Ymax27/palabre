@@ -1,0 +1,11 @@
+{% if challenge %}
+  <section class="card challenge-card">
+    <h2>{{ t("nav_challenge") }}</h2>
+    <h3><a href="/defi">{{ challenge.title }}</a></h3>
+    {% if remaining %}
+      <p>{{ remaining }}</p>
+    {% endif %}
+    <p>{{ participants|default(0) }} {{ t("challenge_participants") }}</p>
+    <p><a href="/defi">{{ t("challenge_join") }}</a></p>
+  </section>
+{% endif %}

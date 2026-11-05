@@ -12,6 +12,7 @@ from app.services.badges import award_badges
 from app.services.captains import pick_weekly_captains
 from app.services.challenges import award_due_podiums
 from app.services.notify import (
+    email_allowed,
     ensure_unsubscribe_token,
     get_prefs,
     notify_challenge_reminder,
@@ -67,7 +68,7 @@ async def challenge_reminder_job(_ctx: dict[str, Any]) -> int:
 async def send_notification_email(
     _ctx: dict[str, Any],
     user_id: int,
-    _kind: str,
+    kind: str,
     title: str,
     url: str,
 ) -> None:
@@ -76,7 +77,7 @@ async def send_notification_email(
         if user is None:
             return
         prefs = await get_prefs(session, user)
-        if not prefs.email:
+        if not email_allowed(prefs, kind):
             return
         token = await ensure_unsubscribe_token(session, user)
         await session.commit()

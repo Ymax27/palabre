@@ -7,6 +7,11 @@ from sse_starlette.sse import EventSourceResponse
 from app.core.bus import subscribe_feed
 from app.core.deps import CurrentUser, SessionDep
 from app.core.templates import templates, view_context
+from app.services.challenges import (
+    featured_challenge,
+    list_participations,
+    remaining_label,
+)
 from app.services.qa import list_questions, tags_grouped
 
 router = APIRouter()
@@ -21,6 +26,12 @@ async def feed(
 ) -> HTMLResponse:
     questions = await list_questions(session, tag_slug=tag)
     groups = await tags_grouped(session)
+    challenge = await featured_challenge(session)
+    participants = 0
+    remaining = ""
+    if challenge is not None:
+        participants = len(await list_participations(session, challenge))
+        remaining = remaining_label(challenge)
     return templates.TemplateResponse(
         request,
         "pages/home.html",
@@ -31,6 +42,9 @@ async def feed(
             questions=questions,
             tag_groups=groups,
             active_tag=tag,
+            challenge=challenge,
+            participants=participants,
+            remaining=remaining,
         ),
     )
 

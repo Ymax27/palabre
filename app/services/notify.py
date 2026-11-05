@@ -15,6 +15,7 @@ from app.services.system import SYSTEM_EMAIL
 
 logger = logging.getLogger("palabre.notify")
 
+# Cloche in-app (PLAN §2 I + DESIGN Merci).
 KINDS = frozenset(
     {
         "answer",
@@ -27,6 +28,25 @@ KINDS = frozenset(
         "reminder",
     }
 )
+
+# Emails SMTP (PLAN l.90) : réponse, acceptation, validation, rappel, digest.
+EMAIL_KINDS = frozenset(
+    {
+        "answer",
+        "accepted",
+        "worked",
+        "reminder",
+        "weekly",
+    }
+)
+
+_EMAIL_PREF_ATTR = {
+    "answer": "email_answer",
+    "accepted": "email_accepted",
+    "worked": "email_worked",
+    "reminder": "email_reminder",
+    "weekly": "email_weekly",
+}
 
 
 def new_unsubscribe_token() -> str:
@@ -45,10 +65,21 @@ async def get_prefs(session: AsyncSession, user: User) -> NotificationPref:
     pref = await session.get(NotificationPref, user.id)
     if pref is not None:
         return pref
-    pref = NotificationPref(user_id=user.id, in_app=True, email=True)
+    pref = NotificationPref(user_id=user.id)
     session.add(pref)
     await session.flush()
     return pref
+
+
+def email_allowed(prefs: NotificationPref, kind: str) -> bool:
+    if not prefs.email:
+        return False
+    if kind not in EMAIL_KINDS:
+        return False
+    attr = _EMAIL_PREF_ATTR.get(kind)
+    if attr is None:
+        return False
+    return bool(getattr(prefs, attr, False))
 
 
 async def save_prefs(
@@ -57,10 +88,20 @@ async def save_prefs(
     *,
     in_app: bool,
     email: bool,
+    email_answer: bool,
+    email_accepted: bool,
+    email_worked: bool,
+    email_reminder: bool,
+    email_weekly: bool,
 ) -> NotificationPref:
     pref = await get_prefs(session, user)
     pref.in_app = in_app
     pref.email = email
+    pref.email_answer = email_answer
+    pref.email_accepted = email_accepted
+    pref.email_worked = email_worked
+    pref.email_reminder = email_reminder
+    pref.email_weekly = email_weekly
     await session.commit()
     return pref
 
@@ -138,7 +179,7 @@ async def notify(
         item = Notification(user_id=user.id, kind=kind, title=title, url=url)
         session.add(item)
         await session.flush()
-    if prefs.email:
+    if email_allowed(prefs, kind):
         await enqueue_email(user, kind, title, url)
     await session.commit()
     return item
@@ -220,6 +261,7 @@ async def notify_merci(
     helper: User,
     url: str,
 ) -> None:
+    # DESIGN : Merci notifie, aucun XP, pas dans la liste des emails PLAN.
     await notify(
         session,
         user=helper,

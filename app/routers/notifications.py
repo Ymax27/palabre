@@ -52,6 +52,11 @@ async def notifications_prefs_save(
     csrf: str = Form(...),
     in_app: str | None = Form(None),
     email: str | None = Form(None),
+    email_answer: str | None = Form(None),
+    email_accepted: str | None = Form(None),
+    email_worked: str | None = Form(None),
+    email_reminder: str | None = Form(None),
+    email_weekly: str | None = Form(None),
 ) -> Response:
     require_csrf(request, csrf)
     await save_prefs(
@@ -59,6 +64,11 @@ async def notifications_prefs_save(
         user,
         in_app=in_app == "on",
         email=email == "on",
+        email_answer=email_answer == "on",
+        email_accepted=email_accepted == "on",
+        email_worked=email_worked == "on",
+        email_reminder=email_reminder == "on",
+        email_weekly=email_weekly == "on",
     )
     return RedirectResponse(
         "/notifications/preferences",

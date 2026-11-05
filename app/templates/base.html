@@ -37,6 +37,18 @@
       header nav { display: flex; gap: var(--s-4); flex: 1; }
       header form { margin: 0; }
       main { max-width: 44rem; margin: 0 auto; padding: var(--s-6) var(--s-4); }
+      .home-layout { display: block; }
+      .home-aside { margin-top: var(--s-6); }
+      @media (min-width: 960px) {
+        main:has(.home-layout) { max-width: 64rem; }
+        .home-layout {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) 16rem;
+          gap: var(--s-6);
+          align-items: start;
+        }
+        .home-aside { margin-top: 0; position: sticky; top: var(--s-4); }
+      }
       .form-dots { white-space: nowrap; }
       .form-dot {
         display: inline-block;
